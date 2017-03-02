@@ -44,6 +44,8 @@ import uuid
 import zlib
 from bs4 import BeautifulSoup
 from random import choice
+import tempfile
+from subprocess import check_output, CalledProcessError, call
 
 from win32com.shell import shell
 from win32com.shell import shellcon
@@ -367,6 +369,60 @@ def commandResult2Str(text_seq):
     if not result:
         out = ''
     return out
+
+def runcmd(adb_cmd):
+    """
+    Format adb command and execute it in shell
+    :param adb_cmd: list adb command to execute
+    :return: string '0' and shell command output if successful, otherwise
+    raise CalledProcessError exception and return error code
+    """
+    t = tempfile.TemporaryFile()
+    final_adb_cmd = []
+    for e in adb_cmd:
+        if e != '':  # avoid items with empty string...
+            final_adb_cmd.append(e)  # ... so that final command doesn't
+            # contain extra spaces
+    print('\n*** Executing ' + ' '.join(adb_cmd) + ' ' + 'command')
+
+    try:
+        output = check_output(final_adb_cmd, stderr=t)
+    except CalledProcessError as e:
+        t.seek(0)
+        result = e.returncode, t.read()
+        print result
+    else:
+        result = 0, output
+        print('\n' + result[1])
+
+    return result
+
+def runcmd2file(adb_cmd, dest_file_handler):
+    """
+    Format adb command and execute it in shell and redirects to a file
+    :param adb_cmd: list adb command to execute
+    :param dest_file_handler: file handler to which output will be redirected
+    :return: string '0' and writes shell command output to file if successful, otherwise
+    raise CalledProcessError exception and return error code
+    """
+    t = tempfile.TemporaryFile()
+    final_adb_cmd = []
+    for e in adb_cmd:
+        if e != '':  # avoid items with empty string...
+            final_adb_cmd.append(e)  # ... so that final command doesn't
+            # contain extra spaces
+    print('\n*** Executing ' + ' '.join(adb_cmd) + ' ' + 'command')
+
+    try:
+        output = call(final_adb_cmd, stdout=dest_file_handler, stderr=t)
+    except CalledProcessError as e:
+        t.seek(0)
+        result = e.returncode, t.read()
+    else:
+        result = output
+        dest_file_handler.close()
+
+    return result
 ###################################################
 '''
 文件，路径相关
@@ -381,7 +437,7 @@ from win32com.shell import shellcon
 def getdesktoppath():
     # return 'C:\\Users\\xxx\\Desktop\\'
     desktop_path = shell.SHGetPathFromIDList(shell.SHGetSpecialFolderLocation(0, shellcon.CSIDL_DESKTOP))
-    return desktop_path + "\\"
+    return desktop_path + os.sep
 
 
 # 返回当前脚本的全路径，末尾带\
@@ -389,9 +445,9 @@ def getthispath():
     path = sys.path[0]
     #判断为脚本文件还是py2exe编译后的文件，如果是脚本文件，则返回的是脚本的目录，如果是py2exe编译后的文件，则返回的是编译后的文件路径
     if os.path.isdir(path):
-        return path + '\\'
+        return path + os.sep
     elif os.path.isfile(path):
-        return os.path.split(path)[0] + '\\'
+        return os.path.split(path)[0] + os.sep
 
 # 获取路径的父目录，末尾不带\
 def getparent(filepath):
