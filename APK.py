@@ -2,6 +2,7 @@
 # ref: https://github.com/tdoly/apk_parse
 
 import os
+import re
 import star
 import struct
 import zipfile
@@ -62,28 +63,26 @@ class APK:
             #     self.parse_cert(i)
 
         self.get_files_types()
-    def parse_cert(self, cert_fname):
-        """
-            parse the cert text and md5
-        :param cert_fname:
-        """
-        # input_bio = M2Crypto.BIO.MemoryBuffer(self.zip.read(cert_fname))
-        # p7 = M2Crypto.SMIME.PKCS7(M2Crypto.m2.pkcs7_read_bio_der(input_bio._ptr()), 1)
-        # sk3 = p7.get0_signers(M2Crypto.X509.X509_Stack())
-        # cert = sk3.pop()
-        # self.cert_text = cert.as_text()
-        # self.cert_md5 = star.md5(cert.as_der())
-        pass
+    # def parse_cert(self, cert_fname):
+    #     """
+    #         parse the cert text and md5
+    #     :param cert_fname:
+    #     """
+    #     input_bio = M2Crypto.BIO.MemoryBuffer(self.zip.read(cert_fname))
+    #     p7 = M2Crypto.SMIME.PKCS7(M2Crypto.m2.pkcs7_read_bio_der(input_bio._ptr()), 1)
+    #     sk3 = p7.get0_signers(M2Crypto.X509.X509_Stack())
+    #     cert = sk3.pop()
+    #     self.cert_text = cert.as_text()
+    #     self.cert_md5 = star.md5(cert.as_der())
+    #     pass
 
     def get_sign_info(self):
         keytool = os.path.join(PathManager.get_java_path(), Constant.KEYTOOL_FILENAME)
-        # s = os.popen('{0} -printcert -jarfile {1}'.format(keytool, self._filename)).read()
-        # print s.decode("gb2312")
-        p = subprocess.Popen([keytool, '-printcert', '-jarfile', self._filename], stdout=subprocess.PIPE, shell=False)
-        s = p.stdout.read().decode("gb2312", "ignore")
-        print s
-        p.stdout.close()
-        retval = p.wait()
+        code, result = star.runcmd([keytool, '-printcert', '-jarfile', self._filename])
+        result = result.decode("gb2312", "ignore")
+        if code==0:
+            pass
+        return result
 
     def is_valid_APK(self):
         return self.valid_apk
@@ -192,7 +191,7 @@ class APK:
             :rtype: string
         """
         try:
-            return self.zip.read(filename)
+            return self._zip.read(filename)
         except KeyError:
             return ""
 
@@ -455,7 +454,7 @@ class APK:
             :rtype: object
         """
         try:
-            return self.xml["AndroidManifest.xml"]
+            return self._xml["AndroidManifest.xml"]
         except KeyError:
             return None
 
@@ -549,13 +548,14 @@ class APK:
         print "APK ICON in: %s" % pkg_name_path
 
 
-    def show_Certificate(cert):
+    def show_Certificate(self, cert):
         print "Issuer: C=%s, CN=%s, DN=%s, E=%s, L=%s, O=%s, OU=%s, S=%s" % (
         cert.issuerC(), cert.issuerCN(), cert.issuerDN(), cert.issuerE(), cert.issuerL(), cert.issuerO(), cert.issuerOU(),
         cert.issuerS())
         print "Subject: C=%s, CN=%s, DN=%s, E=%s, L=%s, O=%s, OU=%s, S=%s" % (
         cert.subjectC(), cert.subjectCN(), cert.subjectDN(), cert.subjectE(), cert.subjectL(), cert.subjectO(),
         cert.subjectOU(), cert.subjectS())
+        print cert.sha1Thumbprint()
 
     def get_arsc_info(arscobj):
         buff = ""

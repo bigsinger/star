@@ -349,27 +349,6 @@ def run(args):
 def runJar(args):
     return Utils.run(args)
 
-def commandResult2Str(text_seq):
-    out = ''
-    result = True
-    try:
-        out = str.strip(" ".join(text_seq).replace("\r", "").replace("\n", "")).decode('utf-8')
-    except Exception, e:
-        logging.warn(u"[out2str] 运行结果utf-8转码错误，将尝试gbk转码")
-        result = False
-
-    if not result:
-        try:
-            result = True
-            out = str.strip(" ".join(text_seq).replace("\r", "").replace("\n", "")).decode('gbk')
-        except Exception, e:
-            logging.warn(u"[out2str] 运行结果gbk转码错误，将输出空字符")
-            result = False
-
-    if not result:
-        out = ''
-    return out
-
 def runcmd(adb_cmd):
     """
     Format adb command and execute it in shell
@@ -393,7 +372,38 @@ def runcmd(adb_cmd):
         print result
     else:
         result = 0, output
-        print('\n' + result[1])
+        # print('\n' + result[1])
+
+    return result
+
+def runcmd2(adb_cmd):
+    """
+    Format adb command and execute it in shell
+    :param adb_cmd: list adb command to execute
+    :return: string '0' and shell command output if successful, otherwise
+    raise CalledProcessError exception and return error code
+    """
+    t = tempfile.TemporaryFile()
+    final_adb_cmd = []
+    for e in adb_cmd:
+        if e != '':  # avoid items with empty string...
+            final_adb_cmd.append(e)  # ... so that final command doesn't
+            # contain extra spaces
+    print('\n*** Executing ' + ' '.join(adb_cmd) + ' ' + 'command')
+
+    try:
+        p = subprocess.Popen(final_adb_cmd, stdout=subprocess.PIPE, shell=False)
+        s = p.stdout.read()
+        p.stdout.close()
+        retval = p.wait()
+        return retval,s
+    except CalledProcessError as e:
+        t.seek(0)
+        result = e.returncode, t.read()
+        print result
+    else:
+        result = 0, output
+        # print('\n' + result[1])
 
     return result
 

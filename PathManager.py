@@ -7,5 +7,6 @@ import os
 '''
 
 class PathManager:
-    def get_java_path(self):
-        pass
+    @staticmethod
+    def get_java_path():
+        return 'D:\\java\\jdk1.7.0_79\\bin\\'
