@@ -57,6 +57,7 @@ class APK:
                         self._permissions.append(str(item.getAttributeNS(Constant.NS_ANDROID_URI, "name")))
 
                     self.valid_apk = True
+                break
 
             # re_cert = re.compile(r'meta-inf(/|\\).*\.(rsa|dsa)')
             # if re_cert.match(i.lower()):
@@ -76,6 +77,23 @@ class APK:
     #     self.cert_md5 = star.md5(cert.as_der())
     #     pass
 
+    '''
+    调用keytool输出信息：
+    签名者 #1:
+
+    签名:
+
+    所有者: CN=Android Debug, O=Android, C=US
+    发布者: CN=Android Debug, O=Android, C=US
+    序列号: 4fea8ec1
+    有效期开始日期: Wed Jun 27 12:40:33 CST 2012, 截止日期: Fri Jun 20 12:40:33 CST 2042
+    证书指纹:
+         MD5: 9E:0F:03:05:37:03:8B:BF:14:93:40:2A:80:F4:72:39
+         SHA1: 03:49:5B:57:29:E6:12:1B:EE:74:A5:7A:54:B2:F9:C7:ED:6B:CF:31
+         SHA256: 52:FA:87:91:A4:42:0E:50:6B:10:35:AE:60:E5:F7:D4:58:70:99:71:F9:20:5D:F7:5D:16:88:A6:B6:42:A3:11
+         签名算法名称: SHA1withRSA
+         版本: 3
+    '''
     def get_sign_info(self):
         keytool = os.path.join(PathManager.get_java_path(), Constant.KEYTOOL_FILENAME)
         code, result = star.runcmd([keytool, '-printcert', '-jarfile', self._filename])
@@ -248,6 +266,7 @@ class APK:
                 return value
         return None
 
+    # 获取启动activity，例如：com.example.crash.MainActivity
     def get_main_activity(self):
         """
             Return the name of the main activity
@@ -393,6 +412,8 @@ class APK:
         """
         return self.get_elements("uses-library", "name")
 
+    # 参数需要：META-INF/NETEASE.RSA，可以先调用get_signature_name获取。
+    # 最后调用show_Certificate来打印信息
     def get_certificate(self, filename):
         """
             Return a certificate object by giving the name in the apk file
@@ -473,6 +494,7 @@ class APK:
             except KeyError:
                 return None
 
+    # 输出类似：META-INF/NETEASE.RSA
     def get_signature_name(self):
         signature_expr = re.compile("^(META-INF/)(.*)(\.RSA|\.DSA)$")
         for i in self.get_files():

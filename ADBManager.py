@@ -1,7 +1,12 @@
 #coding:utf-8
 import os
+import re
 import star
-
+import subprocess
+# from cStringIO import StringIO
+import StringIO
+import Image
+from star.APK import APK
 
 '''
 负责ADB相关的操作
@@ -28,38 +33,139 @@ ADB_COMMAND_SYNC = 'sync'
 ADB_COMMAND_VERSION = 'version'
 ADB_COMMAND_BUGREPORT = 'bugreport'
 
+
+SCALE = 0.5
+
 class ADBManager:
     def __init__(self):
-        self._selectedDevice = None
-    def select(self, serialno):
-        self._selectedDevice = serialno
+        self._deviceSelected = None
+        self._devices = None #{[0].name = "", [0].info = "", }
+        self.get_devices()
+        if len(self._devices)==1:
+            self.select(0)
+        elif len(self._devices)==0:
+            print "no devices"
 
-    def version(self):
+    def get_version(self):
         """
-        Display the version of adb
-        :return: result of star.runcmd() execution
+        Returns ADB tool version
+        adb version
+        ex：1.0.36
         """
         adb_full_cmd = [ADB_COMMAND_PREFIX, ADB_COMMAND_VERSION]
-        return star.runcmd(adb_full_cmd)
-    def getserialno(self):
+        code, ret = star.runcmd(adb_full_cmd)
+        try:
+            pattern = re.compile(r"version\s(.*?)\s")
+            version = pattern.search(ret).group(1)
+        except Exception as e:
+            print e
+            version = None
+        return version
+
+    def get_devices(self):
+        """
+        Return a list containing all connected ADB-devices.
+        """
+        devices = {}
+        out = subprocess.check_output([ADB_COMMAND_PREFIX, "devices", "-l"],
+                                      universal_newlines=True)
+        self.check_output(out)
+        ADB_DEV_PATTERN = re.compile(r"(\S*?)\s*?device\s")
+        for line in out.split('\n'):
+            matched = ADB_DEV_PATTERN.search(line)
+            if matched:
+                name = matched.group(1)
+                devices[name] = line
+        self._devices = devices
+        return devices
+
+    def select(self, name_or_id):
+        """
+        Specify the device name to target
+        example: set_target_device('emulator-5554')
+        """
+        if self._devices is None:
+            self.get_devices()
+
+        if name_or_id is None:
+            self.__error = 'Must get device list first'
+            print "[!] Device not found in device list"
+            return False
+
+        if isinstance(name_or_id, int):
+            index = 0
+            for name, info in self._devices.items():
+                if index==name_or_id:
+                    self._deviceSelected = name
+                    break
+                index = index + 1
+        else:
+            for name, info in self._devices.items():
+                if info.find(name_or_id)>=0:
+                    self._deviceSelected = name
+                    break
+        print "Target device select: %s" % self.get_device_selected()
+        return self._deviceSelected is not None
+
+    def get_device_selected(self):
+        """
+        Returns the selected device to work with
+        """
+        if self._deviceSelected == None:
+            print "[*] No device target set"
+
+        return self._deviceSelected
+
+    def get_model(self):
+        """
+        Get Model name from taget device
+        """
+        model = None
+        if self._deviceSelected is None:
+            print "No device target set"
+        else:
+            pattern = re.compile(r"model:(.+)\sdevice")
+            matched = pattern.search(self._devices[self._deviceSelected])
+            if matched:
+                model = matched.group(1)
+        return model
+
+    def get_serialno(self):
         """
         Get serial number for all available target devices
         :return: result of star.runcmd() execution
         """
-        adb_full_cmd = [ADB_COMMAND_PREFIX, ADB_COMMAND_GETSERIALNO]
-        return star.runcmd(adb_full_cmd)
-    def isDeviceAvailable(self):
-        """
-        Private Function to check if device is available;
-        To be used by only functions inside module
-        :return: True or False
-        """
-        result = self.getserialno()
-        if result[1].strip() == "unknown":
-            return False
+        cmds = [ADB_COMMAND_PREFIX]
+        if len(self._devices)>1 or not self._deviceSelected:
+            cmds.append("-s")
+            cmds.append(self._deviceSelected)
+        cmds.append(ADB_COMMAND_GETSERIALNO)
+        code,ret = star.runcmd(cmds)
+        if code==0:
+            return ret
         else:
-            return True
+            return None
 
+    def get_build_props(self):
+        """
+        Get contents of /system/build.prop as dict.
+        Return dictionary like: Property => Value
+        """
+        build_props = {}
+        cmds = [ADB_COMMAND_PREFIX]
+        if len(self._devices) > 1 or not self._deviceSelected:
+            cmds.append("-s")
+            cmds.append(self._deviceSelected)
+        cmds.append("shell")
+        cmds.append("cat /system/build.prop")
+        out = subprocess.check_output(cmds, universal_newlines=True)
+        for line in out.split('\n'):
+            if line == '':
+                continue
+            prop = line.split('=')
+            if not prop[0].startswith('#'):
+                build_props[prop[0]] = prop[1]
+        return build_props
 
     def bugreport(self, dest_file="default.log"):
         """
@@ -105,15 +211,6 @@ class ADBManager:
         return star.runcmd(adb_full_cmd)
 
 
-    def devices(self, opts=[]):
-        """
-        Get list of all available devices including emulators
-        :param opts: list command options (e.g. ["-r", "-a"])
-        :return: result of star.runcmd() execution
-        """
-        adb_full_cmd = [ADB_COMMAND_PREFIX, ADB_COMMAND_DEVICES, self._convert_opts(opts)]
-        return star.runcmd(adb_full_cmd)
-
 
     def shell(self, cmd):
         """
@@ -121,19 +218,31 @@ class ADBManager:
         :param cmd: string shell command to execute
         :return: result of star.runcmd() execution
         """
-        adb_full_cmd = [ADB_COMMAND_PREFIX, ADB_COMMAND_SHELL, cmd]
-        return star.runcmd(adb_full_cmd)
+        cmds = [ADB_COMMAND_PREFIX]
+        if len(self._devices) > 1 or not self._deviceSelected:
+            cmds.append("-s")
+            cmds.append(self._deviceSelected)
+        cmds.append(ADB_COMMAND_SHELL)
+        cmds.append(cmd)
+        return star.runcmd(cmds)
 
 
-    def install(self, apk, opts=[]):
+    def install(self, apk, opts = None):
         """
         Install *.apk on target
         :param apk: string path to apk on host to install
-        :param opts: list command options (e.g. ["-r", "-a"])
+        :param opts: list command options (e.g. "-r", "-a")
         :return: result of star.runcmd() execution
         """
-        adb_full_cmd = [ADB_COMMAND_PREFIX, ADB_COMMAND_INSTALL, _convert_opts(opts), apk]
-        return star.runcmd(adb_full_cmd)
+        cmds = [ADB_COMMAND_PREFIX]
+        if len(self._devices) > 1 or not self._deviceSelected:
+            cmds.append("-s")
+            cmds.append(self._deviceSelected)
+        cmds.append(ADB_COMMAND_INSTALL)
+        if opts is not None:
+            cmds.append(opts)
+        cmds.append(apk)
+        return star.runcmd(cmds)
 
 
     def uninstall(self, app, opts=[]):
@@ -200,6 +309,27 @@ class ADBManager:
         """
         return ' '.join(opts)
 
+    def start(self, apkfile, force = True):
+        '''
+        运行一个APK，首先解析包名和activity，force为真时，如果未安装则强制安装，如果已经打开了则重新打开。
+        :param apkfile: APK全路径
+        :param force: 是否强制运行
+        :return:
+        '''
+        apk = APK(apkfile)
+        main_activity = apk.get_main_activity()
+        package = apk.get_package()
+        code, ret = self.runapp(package, main_activity)
+        if force and ret:
+            if ret.find("does not exist")>=0:
+                code, ret = self.install(apkfile)
+                if code==0:
+                    code, ret = self.runapp(package, main_activity)
+            elif ret.find("brought to the front")>=0:
+                self.stopapp(package)
+                code, ret = self.runapp(package, main_activity)
+        return (code, ret)
+
     def runapp(self, package, activity):
         return self.shell('am start -W -n ' + package + '/' + activity)
     def startapp(self, package, activity):
@@ -208,9 +338,39 @@ class ADBManager:
         return self.shell('am force-stop ' + package)
     def listpackages(self):
         return self.shell('pm list packages')
+
+
+
+    def check_output(self, out):
+        """
+        Check if the response of a command is valid.
+        """
+        if out == "error: device not found":
+            sys.exit("Error connecting to device!")
+
+    def reboot(self, option):
+        if option == "system":
+            subprocess.call([ADB_COMMAND_PREFIX, "reboot"])
+        elif option in ("recovery", "bootloader"):
+            subprocess.call([ADB_COMMAND_PREFIX, "reboot", option])
+        else:
+            print("Invalid reboot-option!")
+
+
+    def get_screenshot(self, filename, scale = 0.5):
+        retcode, data = self.shell("screencap -p")
+        if retcode==0:
+            data = data.replace(b'\r\n', b'\n')
+            data = data.replace(b'\r\n', b'\n')
+            # star.write(filename, data)
+            im = Image.open(StringIO.StringIO(data))
+            w, h = im.size
+            im_ss = im.resize((int(w*scale), int(h*scale)), Image.ANTIALIAS).convert('RGBA')
+            im_ss.save(filename)
+
 if __name__ == '__main__':
     adb = ADBManager()
-    adb.version()
+    adb.get_version()
     adb.getserialno()
     adb.isDeviceAvailable()
     adb.devices()

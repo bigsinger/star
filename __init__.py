@@ -111,7 +111,8 @@ def log(s, file = 'log.txt', mode = os.O_RDWR | os.O_CREAT):
         try:
             os.write(fd, s)
             result = True
-        except:
+        except Exception as e:
+            print e.message
             print 'can not access file: ' + file + ' open with os.O_RDWR?'
         finally:
             os.close(fd)
@@ -897,7 +898,7 @@ r = star.findall('dd(.*?)aa(.*?)cc', s)
 findall(r"<a.*?href=.*?<\/a>",ss,re.I)
 '''
 def findall(reg, content):
-    r = re.findall(reg, content)
+    r = re.findall(reg, content, re.S)
     return r
 
 # 先抓大后抓小
