@@ -252,7 +252,7 @@ class ADBManager:
         :param opts: list command options (e.g. ["-r", "-a"])
         :return: result of star.runcmd() execution
         """
-        adb_full_cmd = [ADB_COMMAND_PREFIX, ADB_COMMAND_UNINSTALL, _convert_opts(opts), app]
+        adb_full_cmd = [ADB_COMMAND_PREFIX, ADB_COMMAND_UNINSTALL, self._convert_opts(opts), app]
         return star.runcmd(adb_full_cmd)
 
     def wait_for_device(self):
