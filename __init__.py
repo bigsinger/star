@@ -47,8 +47,6 @@ from random import choice
 import tempfile
 from subprocess import check_output, CalledProcessError, call
 
-from win32com.shell import shell
-from win32com.shell import shellcon
 
 # from Crypto.Cipher import AES
 
@@ -363,7 +361,7 @@ def runcmd(adb_cmd):
         if e != '':  # avoid items with empty string...
             final_adb_cmd.append(e)  # ... so that final command doesn't
             # contain extra spaces
-    print('\n*** Executing ' + ' '.join(adb_cmd) + ' ' + 'command')
+    print('\n*** Executing: ' + ' '.join(adb_cmd))
 
     try:
         output = check_output(final_adb_cmd, stderr=t)
@@ -446,10 +444,17 @@ from win32com.shell import shell
 from win32com.shell import shellcon
 '''
 def getdesktoppath():
-    # return 'C:\\Users\\xxx\\Desktop\\'
-    desktop_path = shell.SHGetPathFromIDList(shell.SHGetSpecialFolderLocation(0, shellcon.CSIDL_DESKTOP))
-    return desktop_path + os.sep
+    result = nil
+    try:
+        from win32com.shell import shell
+        from win32com.shell import shellcon
 
+        # return 'C:\\Users\\xxx\\Desktop\\'
+        desktop_path = shell.SHGetPathFromIDList(shell.SHGetSpecialFolderLocation(0, shellcon.CSIDL_DESKTOP))
+        result = desktop_path + os.sep
+    except:
+        result = nil
+    return result
 
 # 返回当前脚本的全路径，末尾带\
 def getthispath():
