@@ -19,6 +19,8 @@ zip
 
 pycrypto https://www.dlitz.net/software/pycrypto/
 '''
+import os
+import sys
 import StringIO
 import base64
 import cookielib
@@ -27,7 +29,6 @@ import datetime
 import gzip
 import hashlib
 import logging
-import os
 import platform
 import re
 import requests
@@ -36,17 +37,16 @@ import socket
 import string
 import struct
 import subprocess
-import sys
 import time
 import urllib
 import urllib2
 import uuid
 import zlib
-from bs4 import BeautifulSoup
-from random import choice
 import tempfile
+import traceback
+from random import choice
+from bs4 import BeautifulSoup
 from subprocess import check_output, CalledProcessError, call
-
 
 # from Crypto.Cipher import AES
 
@@ -311,6 +311,15 @@ def getmac():
 #     win32clipboard.SetClipboardText(s)
 #     win32clipboard.CloseClipboard()
 
+def getclipboard():
+    import win32clipboard
+    s = None
+    win32clipboard.OpenClipboard()
+    if win32clipboard.IsClipboardFormatAvailable(win32clipboard.CF_TEXT):
+        s = win32clipboard.GetClipboardData(win32clipboard.CF_TEXT)
+    win32clipboard.CloseClipboard()
+    return s
+
 #获取当前时间戳，10位
 def gettime10():
     return str(int(time.time()))
@@ -391,7 +400,7 @@ def runcmd2(adb_cmd):
     print('\n*** Executing ' + ' '.join(adb_cmd) + ' ' + 'command')
 
     try:
-        p = subprocess.Popen(final_adb_cmd, stdout=subprocess.PIPE, shell=False)
+        p = subprocess.Popen(final_adb_cmd, stdout=subprocess.PIPE, shell=True)
         s = p.stdout.read()
         p.stdout.close()
         retval = p.wait()
@@ -405,6 +414,34 @@ def runcmd2(adb_cmd):
         # print('\n' + result[1])
 
     return result
+
+def run_cmd_asyn(adb_cmd):
+    ret = 0
+    msg = None
+    """
+    Format adb command and execute it in shell
+    :param adb_cmd: list adb command to execute
+    :return: string '0' and shell command output if successful, otherwise
+    raise CalledProcessError exception and return error code
+    """
+    final_adb_cmd = []
+    for e in adb_cmd:
+        if e != '':  # avoid items with empty string...
+            final_adb_cmd.append(e)  # ... so that final command doesn't
+            # contain extra spaces
+    print('\n*** Executing: ' + ' '.join(adb_cmd))
+
+    try:
+        p = subprocess.Popen(final_adb_cmd, stdout=subprocess.PIPE, shell=False)
+        # s = p.stdout.read()
+        # p.stdout.close()
+        # retval = p.wait()
+        # return retval,s
+    except Exception as e:
+        ret = -1
+        msg = traceback.format_exc()
+        pass
+    return ret, msg
 
 def runcmd2file(adb_cmd, dest_file_handler):
     """
@@ -444,7 +481,7 @@ from win32com.shell import shell
 from win32com.shell import shellcon
 '''
 def getdesktoppath():
-    result = nil
+    result = None
     try:
         from win32com.shell import shell
         from win32com.shell import shellcon
@@ -453,7 +490,9 @@ def getdesktoppath():
         desktop_path = shell.SHGetPathFromIDList(shell.SHGetSpecialFolderLocation(0, shellcon.CSIDL_DESKTOP))
         result = desktop_path + os.sep
     except:
-        result = nil
+        msg = traceback.format_exc()
+        print msg
+        result = None
     return result
 
 # 返回当前脚本的全路径，末尾带\
