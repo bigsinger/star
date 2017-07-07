@@ -1,6 +1,8 @@
+﻿# coding: utf-8
 from optparse import OptionParser
 
 
+# 解析参数
 # options, args = Options.parse(params)
 # s = options.jar
 def parse(params):
