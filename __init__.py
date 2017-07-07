@@ -495,14 +495,17 @@ def getdesktoppath():
         result = None
     return result
 
-# 返回当前脚本的全路径，末尾带\
+# 返回当前脚本的全路径，末尾不带\
+# 在使用os.path.join函数时，后面的路径也不能以\开头，例如：
+# os.path.join(getthispath(), 'tools\\tools.exe') ok
+# os.path.join(getthispath(), '\\tools\\tools.exe') not ok
 def getthispath():
     path = sys.path[0]
     #判断为脚本文件还是py2exe编译后的文件，如果是脚本文件，则返回的是脚本的目录，如果是py2exe编译后的文件，则返回的是编译后的文件路径
     if os.path.isdir(path):
-        return path + os.sep
+        return path
     elif os.path.isfile(path):
-        return os.path.split(path)[0] + os.sep
+        return os.path.split(path)[0]
 
 # 获取路径的父目录，末尾不带\
 def getparent(filepath):
