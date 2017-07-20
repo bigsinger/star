@@ -311,6 +311,9 @@ def getmac():
 #     win32clipboard.SetClipboardText(s)
 #     win32clipboard.CloseClipboard()
 import pyperclip
+keyword = pyperclip.paste()
+'''
+
 
 def getclipboard():
     import win32clipboard
