@@ -310,6 +310,7 @@ def getmac():
 #     win32clipboard.EmptyClipboard()
 #     win32clipboard.SetClipboardText(s)
 #     win32clipboard.CloseClipboard()
+import pyperclip
 
 def getclipboard():
     import win32clipboard
@@ -479,8 +480,8 @@ def runcmd2file(adb_cmd, dest_file_handler):
 返回桌面全路径，末尾带\
 from win32com.shell import shell
 from win32com.shell import shellcon
-'''
-def getdesktoppath():
+
+def get_desktop_path():
     result = None
     try:
         from win32com.shell import shell
@@ -494,6 +495,13 @@ def getdesktoppath():
         print msg
         result = None
     return result
+'''
+
+# 返回桌面全路径，末尾不带\
+def get_desktop_path():
+    import _winreg
+    key = _winreg.OpenKey(_winreg.HKEY_CURRENT_USER, r'Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders',)
+    return _winreg.QueryValueEx(key, "Desktop")[0]
 
 # 返回当前脚本的全路径，末尾不带\
 # 在使用os.path.join函数时，后面的路径也不能以\开头，例如：
@@ -559,7 +567,7 @@ def write(filename, buf, binary=True):
         print e
         return None
 
-# 创建多级目录，比如c:\\test1\\test2,如果test1 test2都不存在，都将被创建
+#os.makedirs 创建多级目录，比如c:\\test1\\test2,如果test1 test2都不存在，都将被创建
 def createdirs(to_create_path):
     path_create = to_create_path
     if os.sep == '\\':
