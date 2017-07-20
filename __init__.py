@@ -305,23 +305,17 @@ def getmac():
     mac = ':'.join('%02X'%i for i in struct.unpack('BBBBBB', buffer))
     return mac
 
-# def setclipboard(s):
-#     win32clipboard.OpenClipboard()
-#     win32clipboard.EmptyClipboard()
-#     win32clipboard.SetClipboardText(s)
-#     win32clipboard.CloseClipboard()
 '''
-pip install clipboard
-import clipboard
-clipboard.copy("abc")  # now the clipboard content will be string "abc"
-text = clipboard.paste()  # text will have the content of clipboard
-
-or:
-
 import pyperclip
 keyword = pyperclip.paste()
-'''
-
+--------------------------------
+or:
+--------------------------------
+def setclipboard(s):
+    win32clipboard.OpenClipboard()
+    win32clipboard.EmptyClipboard()
+    win32clipboard.SetClipboardText(s)
+    win32clipboard.CloseClipboard()
 
 def getclipboard():
     import win32clipboard
@@ -331,6 +325,15 @@ def getclipboard():
         s = win32clipboard.GetClipboardData(win32clipboard.CF_TEXT)
     win32clipboard.CloseClipboard()
     return s
+--------------------------------
+or:
+--------------------------------
+pip install clipboard
+import clipboard
+clipboard.copy("abc")  # now the clipboard content will be string "abc"
+text = clipboard.paste()  # text will have the content of clipboard
+'''
+
 
 #获取当前时间戳，10位
 def gettime10():
