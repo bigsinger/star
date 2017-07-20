@@ -310,6 +310,14 @@ def getmac():
 #     win32clipboard.EmptyClipboard()
 #     win32clipboard.SetClipboardText(s)
 #     win32clipboard.CloseClipboard()
+'''
+pip install clipboard
+import clipboard
+clipboard.copy("abc")  # now the clipboard content will be string "abc"
+text = clipboard.paste()  # text will have the content of clipboard
+
+or:
+
 import pyperclip
 keyword = pyperclip.paste()
 '''
