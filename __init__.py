@@ -747,6 +747,27 @@ def fetchurl(url):
         # print "NOT OK:%s"%(url)
         return None
 
+
+# 下载文件
+def download_file(url, file):
+    if url.find('http') < 0:
+        url = 'http:' + url
+    else:
+        url = url.replace('https:', 'http:')
+    print url
+    urllib.urlretrieve(url, file)
+
+
+# 下载图片到本地
+def download_images(photos=[]):
+    save_dir = get_desktop_path() + '/images/'
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
+
+    # downloads
+    for url in photos:
+        download_file(url, save_dir + os.path.basename(url))
+
 # 下载网页源码到本地文件
 def download(url, f):
     filename = None
@@ -800,6 +821,74 @@ def postdata(url, data, headers = None, isdecode = False):
     if isdecode is True:
         content = gzipdecode(content)
     return content
+
+
+'''
+import sqlite3
+import cookielib
+import urllib2
+import os,sys
+import win32crypt
+
+def build_opener_with_chrome_cookies(domain=None):
+    cookie_file_path = os.path.join(os.environ['LOCALAPPDATA'], r'Google\Chrome\User Data\Default\Cookies')
+    if not os.path.exists(cookie_file_path):
+        raise Exception('Cookies file not exist!')
+    conn = sqlite3.connect(cookie_file_path)
+    # sql = 'select host_key, name, value, path from cookies'
+    sql="select host_key,name,encrypted_value,path from cookies";
+    if domain:
+        sql += ' where host_key like "%{}%";'.format(domain)
+
+    cookie_jar = cookielib.CookieJar()  # No cookies stored yet
+
+    for row in conn.execute(sql):
+        pwd_hash = str(row[2])
+        try:
+            ret = win32crypt.CryptUnprotectData(pwd_hash, None, None, None, 0)
+        except:
+            print 'Fail to decrypt chrome cookies'
+            sys.exit(-1)
+
+        cookie_item = cookielib.Cookie(
+            version=0, name=row[1], value=ret[1],
+            port=None, port_specified=None,
+            domain=row[0], domain_specified=None, domain_initial_dot=None,
+            path=row[3], path_specified=None,
+            secure=None,
+            expires=None,
+            discard=None,
+            comment=None,
+            comment_url=None,
+            rest=None,
+            rfc2109=False,
+        )
+        cookie_jar.set_cookie(cookie_item)  # Apply each cookie_item to cookie_jar
+    conn.close()
+    proxy = {'http':'27.24.163.155:10'}
+    # Return opener
+    return urllib2.build_opener(urllib2.ProxyHandler(proxy),urllib2.HTTPCookieProcessor(cookie_jar))
+
+
+def get_page_content_1(url):
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.6) Gecko/20091201 Firefox/3.5.6',
+    }
+    opener = build_opener_with_chrome_cookies(domain='1688.com')
+    req = urllib2.Request(url, headers=headers)
+    page_content = opener.open(req).read()
+    return page_content
+
+###################################################
+
+import requests
+import browsercookie
+
+def get_page_content_2(url):
+    cj = browsercookie.chrome()
+    page = requests.get(url, cookies=cj)
+    return page.content
+'''
 ###################################################
 '''
 加解密
