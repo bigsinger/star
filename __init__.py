@@ -521,6 +521,8 @@ def get_desktop_path():
 # 在使用os.path.join函数时，后面的路径也不能以\开头，例如：
 # os.path.join(getthispath(), 'tools\\tools.exe') ok
 # os.path.join(getthispath(), '\\tools\\tools.exe') not ok
+# 或者直接调用os.path.abspath(os.path.dirname(__file__))，例如在F:\osopen\studypython\Main.py中调用
+# 则返回F:\osopen\studypython（末尾不带\）；若调用os.path.dirname(__file__)则返回F:/osopen/studypython（末尾不带\）
 def getthispath():
     path = sys.path[0]
     #判断为脚本文件还是py2exe编译后的文件，如果是脚本文件，则返回的是脚本的目录，如果是py2exe编译后的文件，则返回的是编译后的文件路径
