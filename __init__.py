@@ -706,11 +706,14 @@ def utf82gbk(s):
 def gethtml(url, decode = True):
     html = requests.get(url)
     # print html.encoding
+
     if decode is True:
         s = html.text.encode(html.encoding)
     else:
         s = html.text
     # s = BeautifulSoup(s, "lxml")
+
+    s = s.decode(html.encoding) # Python3添加，转换为Unicode
     return s
 
 #简单的爬虫脚本，用来爬取网页gethtmlex('xxxxx', {'ip': '8.8.8.8'})
@@ -756,7 +759,7 @@ def download_file(url, file):
     else:
         url = url.replace('https:', 'http:')
     print(url)
-    urllib.urlretrieve(url, file)
+    urllib.request.urlretrieve(url, file)
 
 
 # 下载图片到本地
