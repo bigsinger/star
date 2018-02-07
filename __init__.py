@@ -443,9 +443,11 @@ def run_cmd_asyn(adb_cmd):
         if e != '':  # avoid items with empty string...
             final_adb_cmd.append(e)  # ... so that final command doesn't
             # contain extra spaces
-    print('\n*** Executing: ' + ' '.join(adb_cmd))
+    # print('\n*** Executing: ' + ' '.join(adb_cmd))
+    print('\n*** Executing: ' + " ".join('%s' % id for id in adb_cmd))
 
     try:
+        print(final_adb_cmd)
         p = subprocess.Popen(final_adb_cmd, stdout=subprocess.PIPE, shell=False)
         # s = p.stdout.read()
         # p.stdout.close()
