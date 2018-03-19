@@ -1,6 +1,7 @@
 # coding: utf-8
 # ref: https://github.com/tdoly/apk_parse
 
+import io
 import os
 import re
 import star
@@ -12,7 +13,7 @@ from io import StringIO
 from . import androconf
 from . import ZipManager
 from . import PathManager
-from . import AXMLPrinter
+from .AXMLPrinter import AXMLPrinter
 from . import Constant
 from zlib import crc32
 from xml.dom import minidom
@@ -40,7 +41,7 @@ class APK:
         self._data = star.read(filename)
         self._filesize = len(self._data)
         # self._filemd5 = star.md5(self._data)
-        self._zip = zipfile.ZipFile(StringIO.StringIO(self._data), "r")
+        self._zip = zipfile.ZipFile(io.BytesIO(self._data), "r")
         for i in self._zip.namelist():
             if i == "AndroidManifest.xml":
                 self._axml = AXMLPrinter(self._zip.read(i))

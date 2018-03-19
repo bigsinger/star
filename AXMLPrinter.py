@@ -2,7 +2,7 @@
 
 import bytecode
 from struct import pack, unpack
-from . import androconf
+from .androconf import *
 from xml.dom import minidom
 from xml.sax.saxutils import escape
 
