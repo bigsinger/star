@@ -2,7 +2,7 @@
 
 import bytecode
 from struct import pack, unpack
-import androconf
+from . import androconf
 from xml.dom import minidom
 from xml.sax.saxutils import escape
 
@@ -83,10 +83,10 @@ class StringBlock(object):
         return self._cache[idx]
 
     def getStyle(self, idx):
-        print idx
-        print idx in self.m_styleOffsets, self.m_styleOffsets[idx]
+        print(idx)
+        print(idx in self.m_styleOffsets, self.m_styleOffsets[idx])
 
-        print self.m_styles[0]
+        print(self.m_styles[0])
 
     def decode(self, array, offset, length):
         length = length * 2
@@ -135,10 +135,10 @@ class StringBlock(object):
         return (array[offset + 1] & 0xff) << 8 | array[offset] & 0xff
 
     def show(self):
-        print "StringBlock", hex(self.start), hex(self.header), hex(self.header_size), hex(self.chunkSize), hex(
-            self.stringsOffset), self.m_stringOffsets
+        print("StringBlock", hex(self.start), hex(self.header), hex(self.header_size), hex(self.chunkSize), hex(
+            self.stringsOffset), self.m_stringOffsets)
         for i in range(0, len(self.m_stringOffsets)):
-            print i, repr(self.getString(i))
+            print(i, repr(self.getString(i)))
 
 
 ATTRIBUTE_IX_NAMESPACE_URI = 0
@@ -734,7 +734,7 @@ class ARSCParser(object):
         try:
             return [ate.get_value(), "%s%s" % (
             complexToFloat(ate.key.get_data()), DIMENSION_UNITS[ate.key.get_data() & COMPLEX_UNIT_MASK])]
-        except Exception, why:
+        except Exception as why:
             androconf.warning(why.__str__())
             return [ate.get_value(), ate.key.get_data()]
 

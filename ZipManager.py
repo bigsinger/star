@@ -36,7 +36,7 @@ class ZipManager:
                     file = open(filepath, 'wb')
                     file.write(zfobj.read(oriname))
                     file.close()
-        except Exception, e:
+        except Exception as e:
             logging.error(u"[ZipManager.unpack] 解压%s到%s,失败，原因：%s", apk_path, dst_path, e)
             return False
         return True
@@ -56,7 +56,7 @@ class ZipManager:
             zfobj = zipfile.ZipFile(apk_path)
             zipnamelist = zfobj.namelist()
             zfobj.close()
-        except Exception, e:
+        except Exception as e:
             logging.error(u"获取%s文件列表失败，原因：%s", apk_path, e)
         finally:
             return zipnamelist
@@ -77,7 +77,7 @@ class ZipManager:
             zfobj.close()
             return content
 
-        except Exception, e:
+        except Exception as e:
             logging.error(u"提取文件%s内容失败，原因：%s", filename, e)
             return None
 
@@ -153,7 +153,7 @@ class ZipManager:
         zf = zipfile.ZipFile(zipPath, mode='w', compression=compressionFlag)
         try:
             zf.write(fileAdded, arcname=fileName)
-        except Exception, e:
+        except Exception as e:
             logging.error(u"[createZipAndAddFile] 创建文件%s失败，原因：%s", zipPath, e)
             return False
         finally:
@@ -166,7 +166,7 @@ class ZipManager:
         try:
             zf = zipfile.ZipFile(zipPath, mode='w', compression=compressionFlag)
             zf.close()
-        except Exception, e:
+        except Exception as e:
             logging.error(u"[createZip] 创建压缩文件%s失败，原因：%s", zipPath, e)
             return False
 
@@ -180,5 +180,5 @@ if __name__ == '__main__':
     apkPath1 = 'E:\\client\\android\\wrapper\\bin\\temp\\641C232CE64AEE1A3E268A93428F0C6C_89\\student_tmp.apk'
     unzipPath = 'E:\\client\\android\\wrapper\\bin\\temp\\641C232CE64AEE1A3E268A93428F0C6C_89\\2'
     if not star.movefile(apkPath1, apkPath):
-        print 'fail'
+        print('fail')
     ZipManager.unpack(apkPath, unzipPath)

@@ -33,6 +33,6 @@ class PathManager:
         return PathManager.get_env('NDK_ROOT')
 
 if __name__ == '__main__':
-    print PathManager.get_android_sdk_path()
-    print PathManager.get_ndk_path()
-    print PathManager.get_java_path()
+    print(PathManager.get_android_sdk_path())
+    print(PathManager.get_ndk_path())
+    print(PathManager.get_java_path())

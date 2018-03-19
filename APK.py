@@ -7,16 +7,16 @@ import star
 import struct
 import zipfile
 import logging
-import StringIO
-import androconf
 import subprocess
-from ZipManager import *
-from PathManager import *
-from AXMLPrinter import *
+from io import StringIO
+from . import androconf
+from . import ZipManager
+from . import PathManager
+from . import AXMLPrinter
+from . import Constant
 from zlib import crc32
 from xml.dom import minidom
-from Constant import Constant
-from dvm_permissions import DVM_PERMISSIONS
+from .dvm_permissions import DVM_PERMISSIONS
 
 class APK:
     def __init__(self, filename):
@@ -512,38 +512,38 @@ class APK:
     def show(self):
         self.get_files_types()
 
-        print "FILES: "
+        print("FILES: ")
         for i in self.get_files():
             try:
-                print "\t", i, self.files[i], "%x" % self.files_crc32[i]
+                print("\t", i, self.files[i], "%x" % self.files_crc32[i])
             except KeyError:
-                print "\t", i, "%x" % self.files_crc32[i]
+                print("\t", i, "%x" % self.files_crc32[i])
 
-        print "PERMISSIONS: "
+        print("PERMISSIONS: ")
         details_permissions = self.get_details_permissions()
         for i in details_permissions:
-            print "\t", i, details_permissions[i]
-        print "MAIN ACTIVITY: ", self.get_main_activity()
+            print("\t", i, details_permissions[i])
+        print("MAIN ACTIVITY: ", self.get_main_activity())
 
-        print "ACTIVITIES: "
+        print("ACTIVITIES: ")
         activities = self.get_activities()
         for i in activities:
             filters = self.get_intent_filters("activity", i)
-            print "\t", i, filters or ""
+            print("\t", i, filters or "")
 
-        print "SERVICES: "
+        print("SERVICES: ")
         services = self.get_services()
         for i in services:
             filters = self.get_intent_filters("service", i)
-            print "\t", i, filters or ""
+            print("\t", i, filters or "")
 
-        print "RECEIVERS: "
+        print("RECEIVERS: ")
         receivers = self.get_receivers()
         for i in receivers:
             filters = self.get_intent_filters("receiver", i)
-            print "\t", i, filters or ""
+            print("\t", i, filters or "")
 
-        print "PROVIDERS: ", self.get_providers()
+        print("PROVIDERS: ", self.get_providers())
 
     def parse_icon(self, icon_path=None):
         """
@@ -567,17 +567,17 @@ class APK:
             data = zfile.read(icon)
             with open(os.path.join(pkg_name_path, icon_name), 'w+b') as icon_file:
                 icon_file.write(data)
-        print "APK ICON in: %s" % pkg_name_path
+        print("APK ICON in: %s" % pkg_name_path)
 
 
     def show_Certificate(self, cert):
-        print "Issuer: C=%s, CN=%s, DN=%s, E=%s, L=%s, O=%s, OU=%s, S=%s" % (
+        print("Issuer: C=%s, CN=%s, DN=%s, E=%s, L=%s, O=%s, OU=%s, S=%s" % (
         cert.issuerC(), cert.issuerCN(), cert.issuerDN(), cert.issuerE(), cert.issuerL(), cert.issuerO(), cert.issuerOU(),
-        cert.issuerS())
-        print "Subject: C=%s, CN=%s, DN=%s, E=%s, L=%s, O=%s, OU=%s, S=%s" % (
+        cert.issuerS()))
+        print("Subject: C=%s, CN=%s, DN=%s, E=%s, L=%s, O=%s, OU=%s, S=%s" % (
         cert.subjectC(), cert.subjectCN(), cert.subjectDN(), cert.subjectE(), cert.subjectL(), cert.subjectO(),
-        cert.subjectOU(), cert.subjectS())
-        print cert.sha1Thumbprint()
+        cert.subjectOU(), cert.subjectS()))
+        print(cert.sha1Thumbprint())
 
     def get_arsc_info(arscobj):
         buff = ""
@@ -614,7 +614,7 @@ class APK:
 
             if APK.isValidDex(contentDex[0:4]) and APK.isValidManifest(contentManifest[0:4]):
                 return True
-        except Exception, e:
+        except Exception as e:
             logging.error(u"[isValidApk] 检测apk是否有效失败，原因：%s", e)
         return False
 
@@ -624,7 +624,7 @@ class APK:
             zipnamelist = ZipManager.getZipNameList(apkPath)
             if "assets/libsecexe.so" in zipnamelist or "assets/data.db" in zipnamelist:
                 return True
-        except Exception, e:
+        except Exception as e:
             logging.error(u"[isWrapperAlready] 检测apk是否加壳失败，原因:%s", e)
         return False
 

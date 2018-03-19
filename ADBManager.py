@@ -1,11 +1,12 @@
 #coding:utf-8
+import io
 import os
 import re
 import star
 import subprocess
 # from cStringIO import StringIO
-import StringIO
-import Image
+from io import StringIO
+from PIL import Image
 from star.APK import APK
 
 '''
@@ -44,7 +45,7 @@ class ADBManager:
         if len(self._devices)==1:
             self.select(0)
         elif len(self._devices)==0:
-            print "no devices"
+            print("no devices")
 
     def get_version(self):
         """
@@ -58,7 +59,7 @@ class ADBManager:
             pattern = re.compile(r"version\s(.*?)\s")
             version = pattern.search(ret).group(1)
         except Exception as e:
-            print e
+            print(e)
             version = None
         return version
 
@@ -89,7 +90,7 @@ class ADBManager:
 
         if name_or_id is None:
             self.__error = 'Must get device list first'
-            print "[!] Device not found in device list"
+            print("[!] Device not found in device list")
             return False
 
         if isinstance(name_or_id, int):
@@ -104,7 +105,7 @@ class ADBManager:
                 if info.find(name_or_id)>=0:
                     self._deviceSelected = name
                     break
-        print "Target device select: %s" % self.get_device_selected()
+        print("Target device select: %s" % self.get_device_selected())
         return self._deviceSelected is not None
 
     def get_device_selected(self):
@@ -112,7 +113,7 @@ class ADBManager:
         Returns the selected device to work with
         """
         if self._deviceSelected == None:
-            print "[*] No device target set"
+            print("[*] No device target set")
 
         return self._deviceSelected
 
@@ -122,7 +123,7 @@ class ADBManager:
         """
         model = None
         if self._deviceSelected is None:
-            print "No device target set"
+            print("No device target set")
         else:
             pattern = re.compile(r"model:(.+)\sdevice")
             matched = pattern.search(self._devices[self._deviceSelected])
@@ -176,7 +177,7 @@ class ADBManager:
         try:
             dest_file_handler = open(dest_file, "w")
         except IOError:
-            print "IOError: Failed to create a log file"
+            print("IOError: Failed to create a log file")
 
         # We have to check if device is available or not before executing this command
         # as adb bugreport will wait-for-device infinitely and does not come out of
@@ -363,7 +364,7 @@ class ADBManager:
             data = data.replace(b'\r\n', b'\n')
             data = data.replace(b'\r\n', b'\n')
             # star.write(filename, data)
-            im = Image.open(StringIO.StringIO(data))
+            im = Image.open(io.BytesIO(data))
             w, h = im.size
             im_ss = im.resize((int(w*scale), int(h*scale)), Image.ANTIALIAS).convert('RGBA')
             im_ss.save(filename)
