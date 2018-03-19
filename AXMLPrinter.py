@@ -1,6 +1,6 @@
 #coding:utf-8
 
-import bytecode
+from . import bytecode
 from struct import pack, unpack
 from .androconf import *
 from xml.dom import minidom
@@ -96,7 +96,8 @@ class StringBlock(object):
 
         for i in range(0, length):
             t_data = pack("=b", self.m_strings[offset + i])
-            data += unicode(t_data, errors='ignore')
+            # data += unicode(t_data, errors='ignore')
+            data += t_data
             if data[-2:] == "\x00\x00":
                 break
 
@@ -235,7 +236,7 @@ class AXMLParser(object):
                 if chunkSize < 8 or chunkSize % 4 != 0:
                     androconf.warning("Invalid chunk size")
 
-                for i in range(0, chunkSize / 4 - 2):
+                for i in range(0, int(chunkSize / 4) - 2):
                     self.m_resourceIDs.append(unpack('<L', self.buff.read(4))[0])
 
                 continue

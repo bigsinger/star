@@ -418,13 +418,13 @@ def runcmd2(adb_cmd):
         s = p.stdout.read()
         p.stdout.close()
         retval = p.wait()
-        return retval,s
+        return retval,str(s,"utf-8")
     except CalledProcessError as e:
         t.seek(0)
-        result = e.returncode, t.read()
+        result = e.returncode, str(t.read(),"utf-8")
         print(result)
     else:
-        result = 0, output
+        result = 0, str(output,"utf-8")
         # print('\n' + result[1])
 
     return result
