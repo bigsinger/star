@@ -63,6 +63,9 @@ class ADBManager:
             version = None
         return version
 
+    def is_no_device(self):
+        return len(adb.get_devices()) == 0
+    
     def get_devices(self):
         """
         Return a list containing all connected ADB-devices.

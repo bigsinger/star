@@ -390,10 +390,10 @@ def runcmd(adb_cmd):
         output = check_output(final_adb_cmd, stderr=t)
     except CalledProcessError as e:
         t.seek(0)
-        result = e.returncode, t.read()
+        result = e.returncode, str(t.read(),"utf-8")
         print(result)
     else:
-        result = 0, output
+        result = 0, str(output,"utf-8")
         # print('\n' + result[1])
 
     return result
