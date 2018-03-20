@@ -106,7 +106,7 @@ def log(s, file = 'log.txt', mode = os.O_RDWR | os.O_CREAT):
     fd = os.open(file, mode)
     if fd > 0 and s:
         try:
-            os.write(fd, s)
+            os.write(fd, bytes(s, 'UTF-8'))
             result = True
         except Exception as e:
             print(e)
