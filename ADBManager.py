@@ -3,10 +3,10 @@ import io
 import os
 import re
 import star
+import logging
 import subprocess
-# from cStringIO import StringIO
-from io import StringIO
 from PIL import Image
+from io import StringIO
 from star.APK import APK
 
 '''
@@ -46,6 +46,7 @@ class ADBManager:
             self.select(0)
         elif len(self._devices)==0:
             print("no devices")
+        self._sdk_version = None
 
     def get_version(self):
         """
@@ -63,9 +64,20 @@ class ADBManager:
             version = None
         return version
 
+    # 获取SDK版本（int类型数值），如：16
+    def get_sdk_version(self):
+        if not self._sdk_version:
+            code, self._sdk_version = self.runshellcmd('getprop ro.build.version.sdk')
+            if code == 0:
+                self._sdk_version = int(self._sdk_version)
+        return self._sdk_version
+
     def is_no_device(self):
-        return len(adb.get_devices()) == 0
-    
+        return len(self.get_devices()) == 0
+
+    def is_connected(self, serial_no):
+        return serial_no in self.get_devices()
+
     def get_devices(self):
         """
         Return a list containing all connected ADB-devices.
@@ -371,6 +383,107 @@ class ADBManager:
             w, h = im.size
             im_ss = im.resize((int(w*scale), int(h*scale)), Image.ANTIALIAS).convert('RGBA')
             im_ss.save(filename)
+
+    def is_app_installed(self, package):
+        '''
+        判断app是否安装
+        '''
+        if package in self.list_installed_app():
+            return True
+        else:
+            return False
+
+    def runshellcmd(self, cmd):
+        cmds = [ADB_COMMAND_PREFIX, 'shell', cmd]
+        return star.runcmd(cmds)
+
+    def list_installed_app(self):
+        '''
+        获取已安装app列表
+        :return: 返回app列表
+        :rtype: list
+        '''
+        retcode, result = self.runshellcmd('pm list packages')
+        result = result.replace('\r', '').splitlines()
+        logging.info(result)
+        installed_app_list = []
+        for app in result:
+            if not 'package' in app: continue
+            if app.split(':')[0] == 'package':
+                # 只获取连接正常的
+                installed_app_list.append(app.split(':')[1])
+        logging.info(installed_app_list)
+        return installed_app_list
+
+    def get_app_userid(self, package_name):
+        uid = None
+        retcode, out = self.runshellcmd('dumpsys package %s' % package_name)
+        if retcode == 0:
+            if package_name in out and "Unable to find package:" not in out:
+                db_result = re.findall('userId=(\d+)', out)
+                if len(db_result) > 0:
+                    uid = db_result[0]
+        return uid
+
+    def get_current_activity(self):
+        # 获取当前activity名
+        if self.get_sdk_version() < 26:  # android8.0以下优先选择dumpsys activity top获取当前的activity
+            current_activity = self.get_top_activity_with_activity_top()
+            if current_activity:
+                return current_activity
+            current_activity = self.get_top_activity_with_usagestats()
+            if current_activity:
+                return current_activity
+            return None
+        else:  # android 8.0以上优先根据dumsys usagestats来获取当前的activity
+            current_activity = self.get_top_activity_with_usagestats()
+            if current_activity:
+                return current_activity
+            current_activity = self.get_top_activity_with_activity_top()
+            if current_activity:
+                return current_activity
+
+    def get_top_activity_with_activity_top(self):
+        '''通过dumpsys activity top 获取当前activity名
+        '''
+        ret = self.run_shell_cmd("dumpsys activity top")
+        if not ret:
+            return None
+        lines = ret.split("\n")
+        top_activity = ""
+        for line in lines:
+            if "ACTIVITY" in line:
+                line = line.strip()
+                logging.debug("dumpsys activity top info line :" + line)
+                activity_info = line.split()[1]
+                if "." in line:
+                    top_activity = activity_info.replace("/", "")
+                else:
+                    top_activity = activity_info.split("/")[1]
+                logging.debug("dump activity top activity:" + top_activity)
+                return top_activity
+        return top_activity
+
+    def get_top_activity_with_usagestats(self):
+        '''通过dumpsys usagestats获取当前activity名
+        '''
+        top_activity = ""
+        ret = self.run_shell_cmd("dumpsys usagestats")
+        if not ret:
+            return None
+        last_activity_line = ""
+        lines = ret.split("\n")
+        for line in lines:
+            if "MOVE_TO_FOREGROUND" in line:
+                last_activity_line = line.strip()
+        logging.debug("dumpsys usagestats MOVE_TO_FOREGROUND lastline :" + last_activity_line)
+        if len(last_activity_line.split("class=")) > 1:
+            top_activity = last_activity_line.split("class=")[1]
+            if " " in top_activity:
+                top_activity = top_activity.split()[0]
+        logging.debug("dumpsys usagestats top activity:" + top_activity)
+        return top_activity
+
 
 if __name__ == '__main__':
     adb = ADBManager()

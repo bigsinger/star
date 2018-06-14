@@ -81,19 +81,20 @@ def initlogging(logFile = u"log.txt", toFile = False):
     #################################################################################################
     '''
     if toFile is False:
-        filename = None
-        stream = sys.stdout
+        logging.basicConfig(
+            level=logging.DEBUG,
+            format='%(asctime)s %(levelname)-6s %(filename)20s:%(lineno)-4d  %(message)s',
+            datefmt='%Y-%m-%d %H:%M:%S',
+            stream=sys.stdout,
+        )
     else:
-        filename = logFile
-        stream = None
-    logging.basicConfig(
-        level = logging.DEBUG,
-        format = '%(asctime)s %(filename)-15s[line:%(lineno)-4d] %(levelname)-6s %(message)s',
-        datefmt = '%Y-%m-%d %H:%M:%S',
-        filename = filename,
-        filemode = 'a',
-        stream = stream
-    )
+        logging.basicConfig(
+            level=logging.DEBUG,
+            format='%(asctime)s %(levelname)-6s %(filename)20s:%(lineno)-4d  %(message)s',
+            datefmt='%Y-%m-%d %H:%M:%S',
+            filename=filename,
+            filemode='a',
+        )
 
 '''
 把一段内容作为日志保存到当前目录下的log.txt文件中，每次重新创建，不追加！追加模式请使用loga函数。
@@ -384,7 +385,7 @@ def runcmd(adb_cmd):
         if e != '':  # avoid items with empty string...
             final_adb_cmd.append(e)  # ... so that final command doesn't
             # contain extra spaces
-    print('\n*** Executing: ' + ' '.join(adb_cmd))
+    # print('\n*** Executing: ' + ' '.join(adb_cmd))
 
     try:
         output = check_output(final_adb_cmd, stderr=t)
