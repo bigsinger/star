@@ -673,6 +673,15 @@ def getfilelistfromdir(rootPath, endstring):
         return []
     return fileList
 
+
+# 把str转换为bytes
+def to_bytes(s):
+    return bytes(s, encoding='utf-8')
+
+# 把bytes转换为str
+def to_str(b):
+    return b.decode('utf-8')
+
 # win下命令行参数为gbk编码：star.gbk2unicode(sys.argv[1]) + u'也有'
 def gbk2unicode(s):
     return s.decode('gbk', 'ignore')
@@ -740,18 +749,16 @@ def gethtmlex(url, params = None):
 
 # 获取网页源码，内部已设置浏览器引擎防止反爬虫。
 def fetchurl(url):
-    request = urllib2.Request(url)
+    req = urllib.request.Request(url)
     useragent =  "Mozilla/5.0 (Windows NT 6.3; WOW64; rv:35.0) Gecko/20100101 Firefox/35.0"
     try:
-        request.add_header('User-Agent', useragent)
-        request.add_header('Referer',url)
-        #request.add_header('Cookie',cookie)
-        response = urllib2.urlopen(request, timeout=5)
-        data = response.read()
-        # print '[step 1]get url OK'
+        req.add_header('User-Agent', useragent)
+        req.add_header('Referer',url)
+        #req.add_header('Cookie',cookie)
+        response = urllib.request.urlopen(req, timeout=5)
+        data = response.read().decode()
         return data
     except :
-        # print "NOT OK:%s"%(url)
         return None
 
 
@@ -814,13 +821,15 @@ def post(url, data, headers = None):
 
 # print star.postdata("http://www.ximalaya.com/tracks/19158075/play", {'played_secs': 0, "duration": 0})
 def postdata(url, data, headers = None, isdecode = False):
-    post_data = urllib.urlencode(data)  #duration=0&played_secs=0
+    # 建议不要用 urllib.urlencode 有bug，不能encode nested dic list,用json上报
+    post_data = json.dumps(data)
+    post_data = bytes(post_data, encoding='utf-8')
     h = headers
     if h is None:
         h = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.122 Safari/537.36'}
     cj = http.cookiejar.CookieJar() # cookielib.CookieJar()
-    opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
-    req = urllib2.Request(url, post_data, h)
+    opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cj))
+    req = urllib.request.Request(url, post_data, h)
     response = opener.open(req)
     # print response.geturl()
     # print response.info()
@@ -833,7 +842,7 @@ def postdata(url, data, headers = None, isdecode = False):
 '''
 import sqlite3
 import cookielib
-import urllib2
+import urllib
 import os,sys
 import win32crypt
 
@@ -874,7 +883,7 @@ def build_opener_with_chrome_cookies(domain=None):
     conn.close()
     proxy = {'http':'27.24.163.155:10'}
     # Return opener
-    return urllib2.build_opener(urllib2.ProxyHandler(proxy),urllib2.HTTPCookieProcessor(cookie_jar))
+    return urllib.request.build_opener(urllib.request.ProxyHandler(proxy),urllib.request.HTTPCookieProcessor(cookie_jar))
 
 
 def get_page_content_1(url):
@@ -882,7 +891,7 @@ def get_page_content_1(url):
         'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.6) Gecko/20091201 Firefox/3.5.6',
     }
     opener = build_opener_with_chrome_cookies(domain='1688.com')
-    req = urllib2.Request(url, headers=headers)
+    req = urllib.request.Request(url, headers=headers)
     page_content = opener.open(req).read()
     return page_content
 
@@ -1111,5 +1120,3 @@ connection.send_messages([email2, email3])
 # 要手动关闭链接
 connection.close()
 """
-
-

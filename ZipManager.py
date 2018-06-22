@@ -176,9 +176,9 @@ class ZipManager:
         return True
 
 if __name__ == '__main__':
-    apkPath = 'E:\\client\\android\\wrapper\\bin\\temp\\641C232CE64AEE1A3E268A93428F0C6C_89\\student.apk'
-    apkPath1 = 'E:\\client\\android\\wrapper\\bin\\temp\\641C232CE64AEE1A3E268A93428F0C6C_89\\student_tmp.apk'
-    unzipPath = 'E:\\client\\android\\wrapper\\bin\\temp\\641C232CE64AEE1A3E268A93428F0C6C_89\\2'
+    apkPath = 's.apk'
+    apkPath1 = 's_tmp.apk'
+    unzipPath = '2'
     if not star.movefile(apkPath1, apkPath):
         print('fail')
     ZipManager.unpack(apkPath, unzipPath)
