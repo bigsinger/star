@@ -287,7 +287,16 @@ class ADBManager:
         if opts is not None:
             cmds.append(opts)
         cmds.append(apk)
-        return star.runcmd(cmds)
+        code, ret = star.runcmd(cmds)
+        if ret.find('Failure') != -1:
+            pattern = re.compile('Failure(.*?)\r\n', re.U | re.S)
+            result = pattern.search(ret)
+            reason = ''
+            if result is not None:
+                reason = result.group(1).strip()
+            logging.error('[x] Failure ' + reason)
+            return False
+        return True
 
 
     def uninstall(self, app, opts=[]):

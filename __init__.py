@@ -398,10 +398,10 @@ def runcmd(adb_cmd):
         output = check_output(final_adb_cmd, stderr=t)
     except CalledProcessError as e:
         t.seek(0)
-        result = e.returncode, str(t.read(),"utf-8")
+        result = e.returncode, to_str(t.read())
         print(result)
     else:
-        result = 0, str(output,"utf-8")
+        result = 0, to_str(output)
         # print('\n' + result[1])
 
     return result
@@ -683,11 +683,12 @@ def getfilelistfromdir(rootPath, endstring):
 
 # 把str转换为bytes
 def to_bytes(s):
-    return bytes(s, encoding='utf-8')
+    return bytes(s, encoding='utf-8', errors='ignore')
 
 # 把bytes转换为str
 def to_str(b):
-    return b.decode('utf-8')
+    # return b.decode('utf-8', 'ignore')
+    return str(b, encoding='utf-8', errors='ignore')
 
 # win下命令行参数为gbk编码：star.gbk2unicode(sys.argv[1]) + u'也有'
 def gbk2unicode(s):
