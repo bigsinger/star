@@ -14,7 +14,7 @@ from . import androconf
 from . import ZipManager
 from . import PathManager
 from .AXMLPrinter import AXMLPrinter
-from . import Constant
+from .Constant import Constant
 from zlib import crc32
 from xml.dom import minidom
 from .dvm_permissions import DVM_PERMISSIONS

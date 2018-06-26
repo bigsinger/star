@@ -92,16 +92,16 @@ class StringBlock(object):
         length = length * 2
         length = length + length % 2
 
-        data = ""
+        data = b''
 
         for i in range(0, length):
             t_data = pack("=b", self.m_strings[offset + i])
             # data += unicode(t_data, errors='ignore')
             data += t_data
-            if data[-2:] == "\x00\x00":
+            if data[-2:] == b"\x00\x00":
                 break
 
-        end_zero = data.find("\x00\x00")
+        end_zero = data.find(b"\x00\x00")
         if end_zero != -1:
             data = data[:end_zero]
 
@@ -375,7 +375,7 @@ class AXMLParser(object):
         if self.m_event != START_TAG:
             return -1
 
-        return len(self.m_attributes) / ATTRIBUTE_LENGHT
+        return (int)(len(self.m_attributes) / ATTRIBUTE_LENGHT)
 
     def getAttributePrefix(self, index):
         offset = self.getAttributeOffset(index)
@@ -538,7 +538,7 @@ class AXMLPrinter(object):
             return "#%08X" % _data
 
         elif _type >= TYPE_FIRST_INT and _type <= TYPE_LAST_INT:
-            return "%d" % androconf.long2int(_data)
+            return "%d" % int(_data)
 
         return "<0x%X, type 0x%02X>" % (_data, _type)
 

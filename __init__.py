@@ -355,10 +355,17 @@ def resetgbk():
     reload(sys)
     sys.setdefaultencoding('GBK')
 
+
+# 直接输出到默认输出，调用者不获取其输出内容.同步调用。
+def runS(args):
+    p = subprocess.Popen(args, shell=True)
+    p.communicate()
+
 def run(args):
     if 'Windows' in platform.system():
-        command = args.encode("utf-8")
-        command = command.decode("utf-8").encode("gbk")
+        # command = args.encode("utf-8")
+        # command = command.decode("utf-8").encode("gbk")
+        command = args
     if 'Linux'in platform.system():
         command = args
     p = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
