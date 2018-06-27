@@ -347,14 +347,6 @@ def gettime13():
 def getcurrenttime():
     return time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
 
-def resetutf8():
-    reload(sys)
-    sys.setdefaultencoding('utf-8')
-
-def resetgbk():
-    reload(sys)
-    sys.setdefaultencoding('GBK')
-
 def run111(cmd):
     result = os.popen(cmd)
     return result.readlines()
@@ -378,9 +370,6 @@ def run(args):
     error = Utils.out2str(p.stderr.readlines())
     # return output if ret is 0 else error
     return star.commandResult2Str(ret)
-
-def runJar(args):
-    return Utils.run(args)
 
 def runcmd(adb_cmd):
     """
