@@ -732,6 +732,14 @@ class ADBManager:
             return module
         return '%s %s' % (brand, module)
 
+    def get_model(self):
+        code, module = self.runshellcmd('getprop ro.product.model')
+        return module
+
+    def get_brand(self):
+        code, brand = self.runshellcmd('getprop ro.product.brand')
+        return brand
+
     def get_system_version(self):
         '''获取系统版本
         '''

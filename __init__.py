@@ -355,6 +355,9 @@ def resetgbk():
     reload(sys)
     sys.setdefaultencoding('GBK')
 
+def run111(cmd):
+    result = os.popen(cmd)
+    return result.readlines()
 
 # 直接输出到默认输出，调用者不获取其输出内容.同步调用。
 def runS(args):
