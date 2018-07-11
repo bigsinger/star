@@ -92,7 +92,7 @@ def initlogging(logFile = u"log.txt", toFile = False):
             level=logging.DEBUG,
             format='%(asctime)s %(levelname)-6s %(filename)20s:%(lineno)-4d  %(message)s',
             datefmt='%Y-%m-%d %H:%M:%S',
-            filename=filename,
+            filename=logFile,
             filemode='a',
         )
 
@@ -675,6 +675,7 @@ def getfilelistfromdir(rootPath, endstring):
 
 # 把str转换为bytes
 def to_bytes(s):
+    # return s.encode('utf-8', 'ignore')
     return bytes(s, encoding='utf-8', errors='ignore')
 
 # 把bytes转换为str
