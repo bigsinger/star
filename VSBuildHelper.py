@@ -9,7 +9,23 @@ import subprocess
 
 
 '''
-ref：Devenv 命令行开关 https://msdn.microsoft.com/zh-cn/library/xee0c8y7.aspx
+这是一个对VisualStudio编译和清理的Python封装类，使用很简单，示例：
+
+from star.VSBuildHelper import VSBuildHelper
+
+vs = VSBuildHelper()
+vs.switch_vs('2017')
+vs.set_sln('../test.sln')
+
+# clean first
+vs.clean()
+
+# build vs project
+vs.build(['Debug|x64'])
+vs.build(['Release|x64'])
+
+
+# devenv命令行开关参考：https://msdn.microsoft.com/zh-cn/library/xee0c8y7.aspx
 '''
 
 
