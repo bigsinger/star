@@ -20,7 +20,9 @@ zip
 pycrypto https://www.dlitz.net/software/pycrypto/
 '''
 import os
+import re
 import sys
+import json
 import base64
 import ctypes
 import datetime
@@ -28,7 +30,6 @@ import gzip
 import hashlib
 import logging
 import platform
-import re
 import requests
 import shutil
 import socket
@@ -671,6 +672,37 @@ def getfilelistfromdir(rootPath, endstring):
         logging.error(u"[getFileListFromDir] 从目录%s获取特定后缀名%s的文件失败", rootPath, endstring)
         return []
     return fileList
+
+
+def load_json_file(file_path):
+    '''
+    功能：以utf-8编码的方式加载json文件，兼容Windows下以b'\xef\xbb\xbf'开头的utf-8文件.
+    j = load_json_file('sample.json')
+    print(j.get('keyname'))
+
+    from codecs import BOM_UTF8
+    BOM_UTF8 = b'\xef\xbb\xbf'
+    :param file_path:json文件路径
+    :return:返回解析好的json字典，失败返回None
+    '''
+    j = None
+    s = None
+    try:
+        with io.open(file_path, 'rb') as f:
+            s = f.read()
+    except:
+        s = None
+
+    if s is not None:
+        try:
+            if s.startswith(b'\xef\xbb\xbf'):
+                j = json.loads(s[3:])
+            else:
+                j = json.loads(s)
+        except:
+            j = None
+
+    return j
 
 
 # 把str转换为bytes
