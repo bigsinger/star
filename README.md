@@ -13,7 +13,7 @@ from star.ZipFileHelper import ZipFileHelper
 ```
 
 ### 说明文档
-- 见[《说明文档》](https://github.com/pythonstar/star/wiki/%E8%AF%B4%E6%98%8E%E6%96%87%E6%A1%A3)
+- 见[《说明文档》](./doc/index.md)
 
 ### 编写规则
 - 尽量函数式编程，如无必要不用类。
