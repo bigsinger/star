@@ -1,4 +1,4 @@
-# coding: utf-8
+﻿# coding: utf-8
 
 import os
 import sys
@@ -39,7 +39,7 @@ class ZipFileHelper:
         if isinstance(src_filepath, list):
             src_filepath = Utils.normal_list(src_filepath)
             for file in src_filepath:
-                file = os.path.normcase(file)
+                file = os.path.normpath(file)
                 dst_zip_filename = Utils.get_zip_name(file, dst_zip_filename)  # 压缩包文件名
                 if dst_zip_filename is not None:
                     base_file_name = os.path.dirname(dst_zip_filename)
@@ -51,7 +51,7 @@ class ZipFileHelper:
                 file_name_list.extend(src_file_list)
                 dir_file_path_list.extend(src_file_path)
         elif isinstance(src_filepath, str):
-            src_filepath = os.path.normcase(src_filepath)
+            src_filepath = os.path.normpath(src_filepath)
             dst_zip_filename = Utils.get_zip_name(src_filepath, dst_zip_filename)
             if dst_zip_filename is not None:
                 base_file_name = os.path.dirname(dst_zip_filename)
@@ -63,7 +63,8 @@ class ZipFileHelper:
         if dst_zip_filename is None:
             logging.error('[ZipFileHelper.zip_file] 压缩失败，原因：%s', '找不到源文件，请检查源文件是否存在')
             return False
-        dst_zip_filename += '.zip'
+        if dst_zip_filename.find('.zip') == -1:
+            dst_zip_filename += '.zip'
         if base_file_name == '':
             base_file_name = os.getcwd()
         if not base_file_name.endswith(os.sep):
@@ -74,7 +75,7 @@ class ZipFileHelper:
             path_for_file.append(path.replace(base_file_name, os.sep))  # 压缩后文件路径，pyminizip 压缩所需参数
         if isinstance(entryname, str):
             temp_list = []
-            temp_list.append(os.path.normcase(entryname))
+            temp_list.append(os.path.normpath(entryname))
             entryname = temp_list
         elif not isinstance(entryname, list):
             entryname = []
@@ -111,7 +112,7 @@ class ZipFileHelper:
         :param password: 如果解压需要密码，这里输入
         :return: 成功返回True，失败返回False
         """
-        src_zip_filename = os.path.normcase(src_zip_filename)
+        src_zip_filename = os.path.normpath(src_zip_filename)
         if not os.path.exists(src_zip_filename):
             logging.error('[ZipFileHelper.unzip_file] 解压失败， 原因：%s文件不存在', src_zip_filename)
             return False
@@ -125,7 +126,7 @@ class ZipFileHelper:
             else:
                 password = None
             if isinstance(dst_dir_path, str):
-                dst_dir_path = os.path.normcase(dst_dir_path)
+                dst_dir_path = os.path.normpath(dst_dir_path)
                 base_file_path = os.path.dirname(dst_dir_path)
                 if base_file_path == '':
                     base_file_path = os.getcwd()
@@ -159,7 +160,7 @@ class ZipFileHelper:
         filename_list与entryname_list为对应关系，如果某一个entryname为空或None则自动计算。
         :return:成功返回True，失败返回False
         """
-        src_zip_filename = os.path.normcase(src_zip_filename)
+        src_zip_filename = os.path.normpath(src_zip_filename)
         if not os.path.exists(src_zip_filename):
             logging.error('[ZipFileHelper.zip_add] 添加失败，原因：%s文件不存在',src_zip_filename)
             return False
@@ -174,7 +175,7 @@ class ZipFileHelper:
             base_file_name = base_file_name + os.sep
         if isinstance(filename_list, str):
             temp_list = []
-            temp_list.append(os.path.normcase(filename_list))
+            temp_list.append(os.path.normpath(filename_list))
             filename_list = temp_list
         elif not isinstance(filename_list, list):
             logging.error('[ZipFileHelper.zip_add] 参数类型错误，filename_list 应该是str、list类型，不应该是%s',
@@ -184,7 +185,7 @@ class ZipFileHelper:
             filename_list = Utils.normal_list(filename_list)
             if isinstance(entryname_list, str):
                 temp_list = []
-                temp_list.append(os.path.normcase(entryname_list))
+                temp_list.append(os.path.normpath(entryname_list))
                 entryname_list = temp_list
             elif not isinstance(entryname_list, list):
                 entryname_list = []
@@ -215,7 +216,7 @@ class ZipFileHelper:
         :return: 成功返回True，失败返回False
         不能从带密码的压缩包内删除文件
         """
-        src_zip_filename = os.path.normcase(src_zip_filename)
+        src_zip_filename = os.path.normpath(src_zip_filename)
         if not os.path.exists(src_zip_filename):
             logging.error('[ZipFileHelper.zip_del] 删除失败，原因：%s文件不存在', src_zip_filename)
             return False
@@ -227,7 +228,7 @@ class ZipFileHelper:
         new_zip_object = zipfile.ZipFile(new_zip_file_name, 'w')
         if isinstance(entryname_list, str):
             temp_list = []
-            temp_list.append(os.path.normcase(entryname_list))
+            temp_list.append(os.path.normpath(entryname_list))
             entryname_list = temp_list
         elif not isinstance(entryname_list, list):
             logging.error('[ZipFileHelper.zip_del] 参数类型错误，entryname_list 应该是str、list类型，不应该是%s',
@@ -275,7 +276,7 @@ class ZipFileHelper:
         self._zip_file_object = zipfile.ZipFile(self._zip_file_name, 'a')
         if isinstance(filename_list, str):
             temp_list = []
-            temp_list.append(os.path.normcase(filename_list))
+            temp_list.append(os.path.normpath(filename_list))
             filename_list = temp_list
         elif not isinstance(filename_list, list):
             logging.error('[ZipFileHelper.push] 参数类型错误，push(filename_list) filename_list 应该是str、list类型，不应该是%s',
@@ -293,7 +294,7 @@ class ZipFileHelper:
                     logging.error('[ZipFileHelper.push] 添加%s失败，原因：%s', file_name, '该文件不存在')
             if isinstance(entryname_list, str):
                 temp_list = []
-                temp_list.append(os.path.normcase(entryname_list))
+                temp_list.append(os.path.normpath(entryname_list))
                 entryname_list = temp_list
             elif not isinstance(entryname_list, list):
                 entryname_list = []
@@ -320,7 +321,7 @@ class ZipFileHelper:
         self._zip_file_object = zipfile.ZipFile(self._zip_file_name, 'r')
         if isinstance(entryname_list, str):
             temp_list = []
-            temp_list.append(os.path.normcase(entryname_list))
+            temp_list.append(os.path.normpath(entryname_list))
             entryname_list = temp_list
         elif not isinstance(entryname_list, list):
             logging.error('[ZipFileHelper.push] 参数类型错误，push(filename_list) filename_list 应该是str、list类型，不应该是%s',
@@ -338,7 +339,7 @@ class ZipFileHelper:
             elif isinstance(filename_list, str):
                 temp_list = []
                 if os.path.isabs(filename_list):
-                    temp_list.append(os.path.normcase(filename_list))
+                    temp_list.append(os.path.normpath(filename_list))
                 else:
                     temp_list.append(os.path.join(base_file_name, filename_list))
                 filename_list = temp_list
@@ -417,8 +418,6 @@ class Utils:
         """
         if os.path.splitdrive(file_name)[0] == '':   # 如果是相对路径 则转为绝对路径
             file_name = os.path.join(os.getcwd(), file_name)
-        file_name = file_name.upper()
-        base_file_path = base_file_path.upper()
         index = file_name.find(base_file_path)
         if index == 0:
             if base_file_path == os.sep:
@@ -440,7 +439,7 @@ class Utils:
         if isinstance(file_list, list):
             normal = []
             for file in file_list:
-                normal.append(os.path.normcase(file))
+                normal.append(os.path.normpath(file))
             file_list = normal
             return file_list
         return None
