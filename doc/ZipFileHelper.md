@@ -5,7 +5,7 @@ ZipFileHelper 提供了对于单文件、多文件的无密码、有密码压缩
 
 该模块目前仅兼容python3。
 
-ZipFileHelper 基于zlib 和pyminzip，使用之前请先安装以下模块：
+ZipFileHelper 基于zlib和pyminizip，使用之前请先安装以下模块：
 
 install zlib
 
@@ -13,7 +13,8 @@ install zlib
     $ sudo apt-get install zlib1g-dev
     mac:
     $ sudo port install zlib
-    windows请直接在官网下载安装包
+    windows：
+    可在"http://gnuwin32.sourceforge.net/packages/zlib.htm"下载安装包安装
 
 install pyminizip
 
@@ -25,7 +26,7 @@ ZipFileHelper提供了四个静态方法，四个类成员方法供使用者使�
 ---
 ### zip_file
 
-将源文件或目录压缩为一个zip文件。该方法为静态方法。
+将单个或多个源文件和目录压缩为一个zip文件。该方法为静态方法。
 ##### Syntax
 ```
 zip_file(src_filepath, dst_zip_filename=None, entryname=None, **karg)
@@ -34,15 +35,15 @@ zip_file(src_filepath, dst_zip_filename=None, entryname=None, **karg)
 
 src_filepath| 
 ---|
-待压缩的文件或目录，参数类型可为str和list。
+待压缩的单个或多个文件和目录，文件路径可为相对路径或绝对路径。参数类型为str或list。
 
 dst_zip_filename| 
 ---|
 
-生成的zip文件的路径（包含文件名）。默认为空，此时生成的zip与源文件在同一目录下。
+生成的zip文件的路径（包含文件名），可为相对路径或绝对路径。若不填或为空，此时将取相对路径，生成的zip与源文件在同一目录下，zip文件名与源文件名相同。
 entryname| 
 ---|
-添加到压缩包里的条目名列表。默认为空，此时压缩包里文件名与源文件名相同。
+添加到压缩包里的条目名列表。若不填或为空，此时若源文件与dst_zip_filename具有相同目录结构（D:\\test\\abc\\def\\g.txt,D:\\test\\a.zip视为具有相同目录结构），则源文件在压缩包内仍保持其目录结构（\\abc\\def\\g.txt），否则，则只取文件名（\\g.txt）。若不为空，则entryname与src_filepath呈一一对应关系。
 **karg| 
 ---|
 若使用者需要加密压缩，请使用password关键字参数。
@@ -75,7 +76,7 @@ src_zip_filename|
 dst_dir_path| 
 ---|
 
-解压后文件所处目录。默认为空，此时压缩包文件将会解压到压缩包文件父目录下。
+解压后文件所处目录。若不填或为空，此时压缩包文件将会解压到压缩包文件父目录下。若不为空且不存在目标目录，则会自动创建目标目录。
 password| 
 ---|
 解压所需密码。默认为空，此时压缩包应未加密。
@@ -92,7 +93,7 @@ ZipFileHelper.unzip_file('good.zip', None, '123')
 ---
 ### zip_add
 
-向zip压缩包内添加文件。该方法为静态方法。
+向zip压缩包内添加单个或多个文件，只允许将文件以未加密的形式添加到压缩包。该方法为静态方法。
 ##### Syntax
 ```
 zip_add(src_zip_filename, filename_list, entryname_list=None)
@@ -106,10 +107,10 @@ src_zip_filename|
 filename_list| 
 ---|
 
-待添加到压缩包内的文件列表。参数类型可为str和list。
+待添加到压缩包内的文件列表，文件路径可为相对路径或绝对路径。参数类型可为str和list。
 entryname_list| 
 ---|
-添加到压缩包内的条目名列表。默认为空，此时添加到压缩包内的文件名与源文件名相同。
+添加到压缩包内的条目名列表。默认为空，此时若源文件与src_zip_filename具有相同目录结构（D:\test\abc\def\g.txt,D:\test\a.zip视为具有相同目录结构），则源文件在压缩包内仍保持其目录结构（\abc\def\g.txt），否则，则只取文件名（\g.txt）。若不为空，则entryname_list与filename_list呈一一对应关系。
 
 ##### Return Value
 添加成功返回True，失败返回False。
@@ -148,7 +149,7 @@ entryname_list|
 ##### 示例
 
 ```
-ZipFileHelper.zip_del('good.zip', '1.txt')
+ZipFileHelper.zip_del('good.zip', 'test\\abc\\1.txt')
 ZipFileHelper.zip_del('good.zip', ['1.txt', 'a.txt'])
 ```
 ##### 备注
@@ -157,7 +158,7 @@ ZipFileHelper.zip_del('good.zip', ['1.txt', 'a.txt'])
 ---
 ### create
 
-新建一个zip压缩包文件。该方法为类成员方法。
+新建一个空zip压缩包文件。该方法为类成员方法。
 ##### Syntax
 ```
 create(zip_filename)
@@ -179,7 +180,7 @@ zip_filename|
 ---
 ### push
 
-向zip压缩包文件添加文件，使用该函数前请首先使用creat函数创建一个压缩文件。该方法为类成员方法。
+向zip压缩包文件添加单个或多个文件和目录，使用该函数前请首先使用create函数创建一个压缩文件。该方法为类成员方法。
 ##### Syntax
 ```
 push(filename_list, entryname_list=None)
@@ -189,10 +190,10 @@ push(filename_list, entryname_list=None)
 filename_list| 
 ---|
 
-待添加到压缩包内的文件列表。参数类型可为str和list。
+待添加到压缩包内的单个或多个文件和目录，文件路径可为相对路径或绝对路径。参数类型可为str和list。
 entryname_list| 
 ---|
-添加到压缩包内的条目名列表。默认为空，此时添加到压缩包内的文件名与源文件名相同。
+添加到压缩包内的条目名列表。默认为空，此时若源文件与src_zip_filename具有相同目录结构（D:\test\abc\def\g.txt,D:\test\a.zip视为具有相同目录结构），则源文件在压缩包内仍保持其目录结构（\abc\def\g.txt），否则，则只取文件名（\g.txt）。若不为空，则entryname_list与filename_list呈一一对应关系。
 ##### Return Value
 该方法没有返回值。
 
@@ -204,7 +205,7 @@ entryname_list|
 ---
 ### pull
 
-从zip压缩包文件中提取文件，使用该函数前请首先使用creat函数创建一个压缩文件。该方法为类成员方法。
+根据filename_list从zip压缩包文件中提取指定文件，使用该函数前请首先使用create函数创建一个压缩文件。该方法为类成员方法。
 ##### Syntax
 ```
 pull(entryname_list, filename_list=None)
@@ -217,7 +218,7 @@ entryname_list|
 待提取的文件列表。参数类型可为str和list。
 filename_list| 
 ---|
-提取后文件名列表。默认为空，此时提取出的文件名与zip压缩包内文件名相同。若filename_list是None或相对路径，则提取出的文件与zip压缩包文件在同一目录下。
+提取出的文件名列表。默认为空，此时提取出的文件名与zip压缩包内文件名相同。若filename_list是空或相对路径，则提取出的文件与zip压缩包文件在同一目录下。若不为空，则filename_list与entryname_list呈一一对应关系。
 ##### Return Value
 该方法没有返回值。
 
@@ -242,10 +243,10 @@ close()
 
 ##### 示例
 ```
-zip = ZipFileHelper()
-zip.create('test.zip')  # 创建一个zip
-zip.push(['1.txt', '2.txt'])  # 将1.txt 和 2.txt 添加到压缩包
-zip.push('3.txt')  # 将3.txt 添加到压缩包
-zip.pull('3.txt', 'a.txt')  # 从压缩包内提取3.txt 并命名为a.txt
-zip.close()  # 操作完毕，关闭
+zip_object = ZipFileHelper()
+zip_object.create('test.zip')  # 创建一个zip
+zip_object.push(['1.txt', '2.txt'])  # 将1.txt 和 2.txt 添加到压缩包
+zip_object.push('3.txt')  # 将3.txt 添加到压缩包
+zip_object.pull('3.txt', 'a.txt')  # 从压缩包内提取3.txt 并命名为a.txt
+zip_object.close()  # 操作完毕，关闭
 ```
