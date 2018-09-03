@@ -139,6 +139,13 @@ def getthispath():
         return os.path.split(path)[0]
 
 
+'''
+如果不能直接执行本py文件，可以建一个bat文件来调用Python执行该脚本：
+set dir=%~dp0
+
+cd /d %dir%
+python PublishHelper.py
+'''
 def main():
     include_list = ['*.py']
     exclude_list = ['__init__.py', '*.pyc']
