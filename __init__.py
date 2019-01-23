@@ -519,7 +519,7 @@ def get_desktop_path():
     key = _winreg.OpenKey(_winreg.HKEY_CURRENT_USER, r'Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders',)
     return _winreg.QueryValueEx(key, "Desktop")[0]
 
-# 返回当前脚本的全路径，末尾不带\
+# 返回当前脚本所在目录的全路径，末尾不带\
 # 在使用os.path.join函数时，后面的路径也不能以\开头，例如：
 # os.path.join(getthispath(), 'tools\\tools.exe') ok
 # os.path.join(getthispath(), '\\tools\\tools.exe') not ok
