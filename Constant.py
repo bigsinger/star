@@ -1,22 +1,20 @@
 # coding: utf-8
-class Constant:
-    @staticmethod
-    def test():
-        pass
+# 引用本文件须：from constant import const
+import const
 
-Constant.NS_ANDROID_URI = 'http://schemas.android.com/apk/res/android'
-Constant.KEYTOOL_FILENAME = 'keytool.exe'
-Constant.MANIFEST_FILENAME = 'AndroidManifest.xml'
+const.NS_ANDROID_URI = 'http://schemas.android.com/apk/res/android'
+const.KEYTOOL_FILENAME = 'keytool.exe'
+const.MANIFEST_FILENAME = 'AndroidManifest.xml'
 
-Constant.dex2jar_FILEPATH = "tools\\dex2jar\\d2j-dex2jar.bat"
-Constant.jdgui_FILEPATH = "tools\\jdgui\\jd-gui.exe"
+const.dex2jar_FILEPATH = "tools\\dex2jar\\d2j-dex2jar.bat"
+const.jdgui_FILEPATH = "tools\\jdgui\\jd-gui.exe"
 
-Constant.ERROR = -1
-Constant.FAILED = -1
-Constant.OK = 0
-Constant.SUCCESS = 0
+const.ERROR = -1
+const.FAILED = -1
+const.OK = 0
+const.SUCCESS = 0
 
-Constant.ERROR_MSG = {
-    Constant.OK:u"成功",
-    Constant.ERROR: u"失败",
+const.ERROR_MSG = {
+    const.OK:u"成功",
+    const.ERROR: u"失败",
 }

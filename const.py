@@ -3,16 +3,17 @@ import sys
 
 
 class _Constant:
-    class ConstError(TypeError):
+    class ConstantError(TypeError):
         pass
-    class ConstCaseError(ConstError):
+
+    class ConstantCaseError(ConstantError):
         pass
 
     def __setattr__(self, key, value):
         if self.__dict__.get(key):
-            raise self.ConstError("can not change const.{}".format(key))
+            raise self.ConstantError("can not change const.{}".format(key))
         if not key.isupper():
-            raise self.ConstCaseError('const name "{}" is not all uppercase'.format(key))
+            raise self.ConstantCaseError('const name "{}" is not all uppercase'.format(key))
         self.__dict__[key] = value
 
 
