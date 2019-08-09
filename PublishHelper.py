@@ -56,7 +56,13 @@ class PublishHelper:
                     all_file_name.append(os.path.join(dirpath, file_name))
         else:
             self.__dfs_get_file(dir_path, all_file_name)
-        zip_name = dir_path + '.zip'
+        dir_name = os.path.basename(dir_path)
+        if len(dir_name) < 1:
+            dir_name = os.path.dirname(dir_path)
+            dir_name = os.path.basename(dir_name)
+        dir_name = dir_name + '.zip'
+        print(dir_name)
+        zip_name = os.path.join(dir_path, dir_name)
         result = ZipFileHelper.zip_file(all_file_name, zip_name)
         if result is True:
             return True
@@ -146,17 +152,21 @@ set dir=%~dp0
 cd /d %dir%
 python PublishHelper.py
 '''
-def main():
+def main(dir_path):
+    print('pack dir: ' + dir_path)
     include_list = ['*.py']
     exclude_list = ['__init__.py', '*.pyc']
-    dir_path = os.path.join(getthispath(), '这里填压缩目录相对路径')
+    # dir_path = os.path.join(getthispath(), '这里填压缩目录相对路径')
     ph = PublishHelper(include=include_list, exclude=exclude_list)
     ph.pack_file(dir_path)
 
 
 if __name__ == '__main__':
     try:
-        ret = main()
+        if len(sys.argv) < 2:
+            print('pak which dir?')
+        else:
+            ret = main(sys.argv[1])
     except:
         print(traceback.format_exc())
         os.system('pause')
