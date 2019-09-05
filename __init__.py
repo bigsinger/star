@@ -412,7 +412,7 @@ def runcmd2(adb_cmd):
         if e != '':  # avoid items with empty string...
             final_adb_cmd.append(e)  # ... so that final command doesn't
             # contain extra spaces
-    print('\n*** Executing ' + ' '.join(adb_cmd) + ' ' + 'command')
+    # print('\n*** Executing ' + ' '.join(adb_cmd) + ' ' + 'command')
 
     try:
         p = subprocess.Popen(final_adb_cmd, stdout=subprocess.PIPE, shell=True)
