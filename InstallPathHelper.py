@@ -73,8 +73,8 @@ class InstallPathHelper:
                 value_name, value_data, value_index = winreg.EnumValue(reg_key, i)
                 value_lower = value_name.lower()
                 if self._app_name in value_lower:
-                    file_path = value_name
-                    if os.path.exists(file_path):
+                    if os.path.exists(value_name):
+                        file_path = value_name
                         print(file_path)
                         break
         except Exception as e:
