@@ -59,6 +59,11 @@ __all__ = ['path', 'file', 'net', 'zip', 'crypt']
 ###################################################
 
 '''
+获取用户输入
+x = input('please input: ')
+'''
+
+'''
 示例：
 star.initlogging()
 logging.debug(u"%s %d", u"哈", 1)
@@ -305,6 +310,16 @@ def getmac():
     # Convert binary data into a string.
     mac = ':'.join('%02X'%i for i in struct.unpack('BBBBBB', buffer))
     return mac
+
+
+'''
+获取uuid或mac
+'''
+def get_mac():
+    import uuid
+    mac = uuid.uuid1().hex[-12:]
+    return mac
+
 
 '''
 import pyperclip
@@ -843,14 +858,38 @@ def gzipdecode(data):
 
 
 # print star.post("http://www.ximalaya.com/tracks/19158075/play", {'played_secs': 0, "duration": 0})
+# def post(url, data, headers = None):
+#     h = headers
+#     if h is None:
+#         h = {
+#           'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.122 Safari/537.36'},
+#             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3',
+#     s = requests.session()
+#     r = s.post(url, data = data, headers = h)
+#     soup = BeautifulSoup(r.text, "lxml")
+#     return soup
+
+# 有时不能返回正确的编码导致的乱码文本，可以指定下headers中的：'Accept': 'text/html',
 def post(url, data, headers = None):
     h = headers
     if h is None:
-        h = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.122 Safari/537.36'}
-    s = requests.session()
-    r = s.post(url, data = data, headers = h)
-    soup = BeautifulSoup(r.text, "lxml")
-    return soup
+        h = {
+            'Accept': 'text/html',
+            'Accept-Encoding': 'gzip, deflate',
+            'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
+            }
+    r = requests.post(url, data = data, headers = h)
+    return r.content.decode()
+
+# import urllib, urllib.request
+def post2(url, data):
+    data = urllib.parse.urlencode(data)
+    data = data.encode('utf-8')
+    req = urllib.request.Request(url=url, data=data)
+    response = urllib.request.urlopen(req)
+    # print(response.info())
+    return response.read().decode()
+
 
 # print star.postdata("http://www.ximalaya.com/tracks/19158075/play", {'played_secs': 0, "duration": 0})
 def postdata(url, data, headers = None, isdecode = False):
