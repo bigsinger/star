@@ -2,8 +2,15 @@
 
 import os
 import sys
+import time
 import shutil
+import threading
 import traceback
+from star.debug.formatter import info, debug
+try:
+    import queue
+except ImportError:
+    import Queue as queue
 
 
 def get_this_path():
@@ -198,3 +205,64 @@ def getfilelistfromdir(rootPath, endstring):
         print(traceback.format_exc())
         return []
     return fileList
+
+
+
+class PathWalker(object):
+    '''
+    def dofile(file_path):
+        ...
+
+    from star.path import PathWalker
+    PathWalker('D:/test/temp', dofile, ['apk', 'txt'], verbose=True).start()
+    '''
+    
+    def __init__(self, dir_path, callback = None, ext_filter_list = None, **kwargs):
+        self._dir_path = dir_path
+        self._callback = callback
+        self._ext_filter_list = ext_filter_list
+        self._verbose = kwargs.get("verbose", False)
+        self._threads = kwargs.get('threads', 10)
+        self._queue = queue.Queue()
+
+    def _thread_proc(self):
+        try:
+            while True:
+                file_path = self._queue.get()
+                if self._verbose:
+                    debug('file: ' + file_path)
+                if self._callback:
+                    self._callback(file_path)
+                self._queue.task_done()
+        except KeyboardInterrupt:
+            self._queue.all_tasks_done()
+
+    def start(self):
+        info('walk begin')
+        self.startTime = time.time()
+        if self._ext_filter_list:
+            info('file filter: ' + str(self._ext_filter_list))
+        else:
+            info('enum all files')
+
+        for root, dirs, files in os.walk(self._dir_path):
+            for name in files:
+                if self._ext_filter_list:
+                    _, ext = os.path.splitext(name)
+                    if ext:
+                        ext = ext[1:]
+                        ext = ext.lower()
+                        if ext in self._ext_filter_list:
+                            self._queue.put(os.path.join(root, name))
+                else:
+                    self._queue.put(os.path.join(root, name))
+
+        try:
+            for _ in range(self._threads):
+                t = threading.Thread(target=self._thread_proc)
+                t.daemon = True
+                t.start()
+            self._queue.join()
+            info('walk end, time used: %.1f s' % (time.time() - self.startTime))
+        except (KeyboardInterrupt, SystemExit):
+            self._queue.all_tasks_done()

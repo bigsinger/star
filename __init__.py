@@ -42,6 +42,7 @@ from io import StringIO
 # from Crypto.Cipher import AES
 
 import star.net
+import star.sys
 import star.path
 import star.debug
 import star.strings
