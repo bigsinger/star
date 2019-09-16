@@ -85,6 +85,7 @@ def get_desktop_path2():
         result = None
     return result
 
+# os.makedirs()
 def makedirs(to_create_path):
     '''
     创建多级目录，比如c:\\test1\\test2,如果test1 test2都不存在，都将被创建

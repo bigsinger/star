@@ -19,11 +19,7 @@ zip
 
 pycrypto https://www.dlitz.net/software/pycrypto/
 
-import star.net
-import star.path
-import star.debug
-import star.strings
-from star.debug.formatter import info, error
+
 '''
 import os
 import sys
@@ -44,6 +40,12 @@ import tempfile
 from io import StringIO
 
 # from Crypto.Cipher import AES
+
+import star.net
+import star.path
+import star.debug
+import star.strings
+from star.debug.formatter import info, error
 
 __all__ = ['path', 'file', 'net', 'zip', 'crypt']
 

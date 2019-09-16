@@ -2,6 +2,10 @@
 
 '''
 摘自：https://github.com/Ekultek/WhatDir 中的 request_creator
+
+from star.net.request_creator import RequestMaker
+target_data = ['/search', '/category', '/test1111']
+results = RequestMaker('http://www.xxxxx.com', target_data).threaded_response_helper()
 '''
 
 import threading
@@ -12,7 +16,7 @@ except ImportError:
 
 import requests
 
-from star.formatter import (
+from star.debug.formatter import (
     info,
     debug
 )

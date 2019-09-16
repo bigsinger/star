@@ -18,6 +18,25 @@ def read(filename, binary=True):
         print(e)
         return None
 
+def process_file(filename, chunk=1024):
+    """
+    process a file in chunks, this should save some time when processing large files
+    testing with 37 million lines the file processed in just under 40 seconds
+    """
+    retval = set()
+    with open(filename) as data:
+        while True:
+            piece = data.read(chunk)
+            if piece:
+                for item in piece.splitlines():
+                    item = item.strip()
+                    if not str(item).startswith("/"):
+                        item = "/{}".format(item)
+                    retval.add(item)
+            else:
+                break
+    return retval
+
 def write(filename, buf, binary=True):
     try:
         with open(filename, 'wb' if binary else 'w') as f:
