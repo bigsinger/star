@@ -2,6 +2,7 @@
 
 import os
 import sys
+import time
 import traceback
 import subprocess
 from subprocess import check_output, CalledProcessError, call
@@ -238,3 +239,75 @@ def runcmd2file(adb_cmd, dest_file_handler):
         dest_file_handler.close()
 
     return result
+
+
+def MultiProcess():
+    '''
+    多进程运行
+    :return: 
+    '''
+    from multiprocessing import Process
+    for _ in range(5):
+        p = Process(target=core.Main, args=(url, proxy, headers, level, cookie, method))
+        p.start()
+        p.join()
+
+def redirect_std(file_name): 
+    '''
+    重定向标准输入输出流, eg.
+    import star.sys
+    star.sys.redirect_std('log.txt')
+    print('test')
+    :param file_name: 
+    :return: 
+    '''
+    f = open(file_name, 'a')
+    # denature std fd's
+    os.dup2(f.fileno(), sys.stdin.fileno())
+    os.dup2(f.fileno(), sys.stdout.fileno())
+    os.dup2(f.fileno(), sys.stderr.fileno())
+    f.close()
+    
+
+def load_modules():
+    """
+    Read the INDEX_FILE and load all modules. Used by client and server.
+    """
+    # a text file named INDEX_FILE is created during the build process that
+    # lists the names of all the modules in the modules/ directory. this file
+    # is needed because the package has no way to know the names of the modules
+    # to load otherwise. it can't use os.listdir('modules') because in
+    # production, this is executing in a zip file, so the modules aren't on the
+    # filesystem
+    import pkg_resources
+    from importlib import import_module
+    
+    for fname in pkg_resources.resource_string(__name__, 'modindex.txt').split():
+        fname = fname.decode()
+        print(fname)
+        if fname.endswith('.py'):
+            mod = os.path.splitext(fname)[0]
+
+            # __init__ isn't a command, but we need it for modules to work correctly
+            if mod == '__init__':
+                continue
+            else:
+                ...
+
+            import_module('modules.' + mod)
+            # TODO : validate module structure for required functions
+
+def _loading():
+    import itertools
+    for c in itertools.cycle(['|', '/', '-', '\\']):
+        if loading == True:
+            break
+        sys.stdout.write('\rLoading...' + c)
+        sys.stdout.flush()
+        time.sleep(0.1)
+        
+def loading():
+    import threading
+    t = threading.Thread(target=_loading)
+    t.start()
+

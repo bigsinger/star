@@ -5,6 +5,7 @@ import re
 import http
 import requests
 import traceback
+import posixpath
 import urllib, urllib.request
 from urllib import parse
 
@@ -64,7 +65,7 @@ def post_get_soup(url, data, headers = None):
         h = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.122 Safari/537.36'}
     s = requests.session()
     r = s.post(url, data = data, headers = h)
-    soup = BeautifulSoup(r.text, "lxml")
+    soup = BeautifulSoup(r.text, "lxml")    # html.parser
     return soup
 
 def post2(url, data, headers = None):
@@ -330,7 +331,7 @@ def create_request_headers(proxy=None, headers=None, user_agent=False):
         header_retval["User-Agent"] = grab_random_user_agent()
     return proxy_retval, header_retval
 
-def is_valid_url(url):
+def url_is_valid(url):
     """
     basic heuristic check to see if the URL is validated or not
     a valid URL should have 'http(s)://' in it
@@ -347,3 +348,59 @@ def is_valid_url(url):
     except:
         usable_url = "{}://{}".format(parsed_url.scheme, parsed_url.netloc)
     return True, usable_url
+
+def url_is_valid2(url):
+	purl = urlsplit(url)
+
+	if not purl.scheme or not purl.netloc:
+		return False
+
+	# ensure netloc is in the form "something dot something"
+	#if not re.match(r'^[^\.]+\..*(?<!\.)$', purl.netloc, re.I):
+	if not re.match(r'^.+\..+$', purl.netloc):
+		return False
+
+	return True
+
+def normalize_url(url):
+    '''
+    add http if scheme is not present
+    if an url like 'test.com:80//path' is passed to urlsplit the result is:
+    (scheme='test.com',  path='80//path', ...)
+    
+    www.baidu.com -> http://www.baidu.com/
+    http://www.baidu.com -> http://www.baidu.com/
+    :param url:
+    :return:
+    '''
+    if not re.match("^[a-z]+://", url, re.I):
+        url = "http://%s" % url
+
+    purl = parse.urlsplit(url)
+
+    # no path and no query_string .. just ensure url ends with /
+    if not purl.path:
+        return "%s/" % purl.geturl()
+
+    # group multiple / (path//to///file -> path/to/file)
+    new_path = re.sub(r"/+","/", purl.path)
+    # normalize ../../../
+    new_path = posixpath.normpath(new_path)
+    if purl.path.endswith('/') and not new_path.endswith('/'):
+        new_path += '/'
+
+    purl = purl._replace(path = new_path)
+    return purl.geturl()
+
+def session(proxies,headers,cookie):
+    '''
+    :param proxies: eg. {'https':'https://10.10.1.10:1080'}
+    :param headers: 
+    :param cookie: eg.  {"ID":"1094200543"}
+    :return: 
+    '''
+    r=requests.Session()
+    r.proxies=proxies
+    r.headers=headers
+    r.cookies.update(json.loads(cookie))
+    return r

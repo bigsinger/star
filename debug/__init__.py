@@ -55,6 +55,9 @@ def initlogging(logFile = u"log.txt", toFile = False):
             filemode='a',
         )
 
+def disable():
+    logging.basicConfig(format='%(message)s', level=None)
+
 '''
 把一段内容作为日志保存到当前目录下的log.txt文件中，每次重新创建，不追加！追加模式请使用loga函数。
 s：      将要被输出到日志文件的bytes内容，字符串不可用。如果是字符串请用with open(file, 'w')
