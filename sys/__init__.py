@@ -66,7 +66,7 @@ def setclipboard2(s):
     :return: 
     '''
     import pyperclip
-    clipboard.copy(s)
+    pyperclip.copy(s)
 
 def getclipboard(s):
     import pyperclip
