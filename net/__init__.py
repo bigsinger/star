@@ -209,22 +209,25 @@ def get_page_content_2(url):
 ###################################################
 
 # 获取网页源码，内部已设置浏览器引擎防止反爬虫。
-def get_data(url):
+def get_data(url, referer=None, encoding='utf-8'):
     req = urllib.request.Request(url)
-    useragent =  "Mozilla/5.0 (Windows NT 6.3; WOW64; rv:35.0) Gecko/20100101 Firefox/35.0"
+    useragent = "Mozilla/5.0 (Windows NT 6.3; WOW64; rv:35.0) Gecko/20100101 Firefox/35.0"
     try:
         req.add_header('User-Agent', useragent)
-        req.add_header('Referer',url)
-        #req.add_header('Cookie',cookie)
+        if referer:
+            req.add_header('Referer', referer)
         response = urllib.request.urlopen(req, timeout=5)
-        data = response.read().decode()
+        data = response.read()
+        data = data.decode(encoding, 'ignore')
         return data
     except :
+        print(traceback.format_exc())
         return None
 
 #使用requests库封装一个简单的通过get方式获取网页源码的函数
 def get_data2(url, decode = True):
     html = requests.get(url)
+    html.encoding = html.apparent_encoding  #可以正确编码
     # print(html.encoding)
 
     if decode is True:
@@ -259,10 +262,10 @@ def get_data_ex(url, params = None):
 def download_file(url, f):
     filename = None
     try:
-        filename = urllib.urlretrieve(url, filename = f)
+        filename = urllib.request.urlretrieve(url, filename = f)
         # print filename[0], filename[1]
     except Exception as e:
-        print('except: ' + e.message)
+        print(traceback.format_exc())
         filename = None
     return filename
 
