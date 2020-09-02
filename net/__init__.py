@@ -226,14 +226,14 @@ def get_data(url, referer=None, encoding='utf-8'):
 
 #使用requests库封装一个简单的通过get方式获取网页源码的函数
 def get_data2(url, decode = True):
-    html = requests.get(url)
-    html.encoding = html.apparent_encoding  #可以正确编码
-    # print(html.encoding)
+    response = requests.get(url)
+    response.encoding = response.apparent_encoding  #可以正确编码
+    # print(response.encoding)
 
     if decode is True:
-        s = html.text.encode(html.encoding)
+        s = response.text.encode(response.encoding)
     else:
-        s = html.text
+        s = response.text
     # s = BeautifulSoup(s, "lxml")
 
     s = s.decode() # Python3添加，转换为Unicode
