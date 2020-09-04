@@ -30,6 +30,8 @@ def get_this_path():
         return os.path.split(path)[0]
 
 def get_parent_path(filepath):
+    # os.path.dirname(filepath)
+    # os.pardir(filepath)
     '''
     相当于os.path.dirname的改进版，filepath末尾是否带反斜杠都可以正确获取
     :param filepath:
