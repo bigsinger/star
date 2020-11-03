@@ -1,5 +1,6 @@
 # coding: utf-8
 
+import io
 import os
 import sys
 import json
@@ -61,7 +62,8 @@ def load_json_file(file_path):
     try:
         with io.open(file_path, 'rb') as f:
             s = f.read()
-    except:
+    except Exception as e:
+        print(e)
         s = None
 
     if s is not None:
